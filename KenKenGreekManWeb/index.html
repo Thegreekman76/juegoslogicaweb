@@ -1,0 +1,1619 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧮 KenKen - Math Logic Game</title>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%);
+            color: white;
+            min-height: 100vh;
+            user-select: none;
+            padding-bottom: 20px;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 15px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .title {
+            font-size: 32px;
+            background: linear-gradient(45deg, #FFD700, #FF9800, #E91E63);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+            animation: glow 3s ease-in-out infinite alternate;
+        }
+        
+        .subtitle {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 15px;
+        }
+        
+        @keyframes glow {
+            from { text-shadow: 0 0 20px rgba(255, 215, 0, 0.3); }
+            to { text-shadow: 0 0 30px rgba(255, 215, 0, 0.6); }
+        }
+        
+        /* Secciones colapsables */
+        .collapsible-section {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 15px;
+            margin-bottom: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            overflow: hidden;
+        }
+        
+        .section-header {
+            padding: 12px 15px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            background: rgba(255, 255, 255, 0.1);
+            transition: background 0.2s ease;
+        }
+        
+        .section-header:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        .section-icon {
+            font-size: 16px;
+            transition: transform 0.3s ease;
+        }
+        
+        .section-content {
+            padding: 15px;
+            display: none;
+            animation: slideDown 0.3s ease;
+        }
+        
+        .section-content.active {
+            display: block;
+        }
+        
+        .collapsible-section.collapsed .section-icon {
+            transform: rotate(-90deg);
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .game-info {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .info-item {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 10px;
+        }
+        
+        .info-label {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 5px;
+        }
+        
+        .info-value {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .level-info .info-value {
+            color: #FFD700;
+        }
+        
+        .time-info .info-value {
+            color: #4CAF50;
+        }
+        
+        .errors-info .info-value {
+            color: #FF6B6B;
+        }
+        
+        .progress-info .info-value {
+            color: #2196F3;
+        }
+        
+        .difficulty-selector {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .difficulty-btn {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            min-width: 70px;
+        }
+        
+        .difficulty-btn.active {
+            background: linear-gradient(45deg, #FFD700, #FF9800);
+            color: #333;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+        }
+        
+        .difficulty-btn:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .instructions {
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        .instructions h3 {
+            color: #FFD700;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+        
+        .instructions p {
+            font-size: 13px;
+            line-height: 1.4;
+            margin-bottom: 8px;
+        }
+        
+        .instructions ul {
+            padding-left: 20px;
+            margin: 10px 0;
+        }
+        
+        .instructions li {
+            font-size: 13px;
+            line-height: 1.4;
+            margin-bottom: 5px;
+        }
+        
+        .operation-examples {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin: 10px 0;
+        }
+        
+        .example-box {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .example-op {
+            font-size: 16px;
+            font-weight: bold;
+            color: #FFD700;
+            margin-bottom: 5px;
+        }
+        
+        .example-desc {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        /* Indicador de scroll para mobile */
+        .scroll-indicator {
+            position: fixed;
+            bottom: 15px;
+            right: 15px;
+            background: rgba(255, 215, 0, 0.9);
+            color: #333;
+            padding: 8px;
+            border-radius: 50%;
+            font-size: 12px;
+            z-index: 100;
+            animation: bounce 2s infinite;
+            display: none;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .game-board {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 400px;
+        }
+        
+        .kenken-grid {
+            display: grid;
+            gap: 2px;
+            background: #333;
+            padding: 8px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .kenken-cell {
+            width: 60px;
+            height: 60px;
+            background: #fff;
+            border: 3px solid #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            border-radius: 3px;
+            box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1);
+        }
+        
+        .kenken-cell:hover {
+            background: #f0f8ff;
+            transform: scale(1.05);
+            z-index: 10;
+        }
+        
+        .kenken-cell.selected {
+            background: #e3f2fd;
+            border: 3px solid #2196F3;
+            box-shadow: 0 0 15px rgba(33, 150, 243, 0.5);
+        }
+        
+        .kenken-cell.error {
+            background: #ffebee;
+            border-color: #f44336;
+            animation: shake 0.5s ease-in-out;
+        }
+        
+        .kenken-cell.completed {
+            background: #e8f5e8;
+            border-color: #4caf50;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-3px); }
+            75% { transform: translateX(3px); }
+        }
+        
+        .cage-label {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            font-size: 11px;
+            font-weight: bold;
+            color: #333;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 3px 5px;
+            border-radius: 4px;
+            line-height: 1;
+            border: 1px solid rgba(0,0,0,0.2);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+            z-index: 10;
+        }
+        
+        .cell-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        /* Colores de cages - más suaves con bordes más oscuros */
+        .cage-0 { background-color: #ffebee !important; border-color: #e91e63 !important; border-width: 4px !important; }  
+        .cage-1 { background-color: #f3e5f5 !important; border-color: #9c27b0 !important; border-width: 4px !important; }  
+        .cage-2 { background-color: #e8f5e8 !important; border-color: #4caf50 !important; border-width: 4px !important; }  
+        .cage-3 { background-color: #e3f2fd !important; border-color: #2196f3 !important; border-width: 4px !important; }  
+        .cage-4 { background-color: #fff3e0 !important; border-color: #ff9800 !important; border-width: 4px !important; }  
+        .cage-5 { background-color: #fce4ec !important; border-color: #e91e63 !important; border-width: 4px !important; }  
+        .cage-6 { background-color: #e0f2f1 !important; border-color: #009688 !important; border-width: 4px !important; }  
+        .cage-7 { background-color: #f1f8e9 !important; border-color: #8bc34a !important; border-width: 4px !important; }  
+        .cage-8 { background-color: #fff8e1 !important; border-color: #ffc107 !important; border-width: 4px !important; }  
+        .cage-9 { background-color: #e8eaf6 !important; border-color: #3f51b5 !important; border-width: 4px !important; }  
+        
+        .number-input {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .input-label {
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .number-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
+            gap: 8px;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        
+        .number-btn {
+            aspect-ratio: 1;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+        
+        .number-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .number-btn.selected {
+            background: linear-gradient(45deg, #FFD700, #FF9800);
+            color: #333;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            flex: 1;
+            min-width: 100px;
+            padding: 12px 8px;
+            border: none;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(45deg, #FFD700, #FF9800);
+            color: #333;
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(45deg, #6C757D, #ADB5BD);
+            color: white;
+        }
+        
+        .btn-success {
+            background: linear-gradient(45deg, #4CAF50, #66BB6A);
+            color: white;
+        }
+        
+        .btn-warning {
+            background: linear-gradient(45deg, #FF9800, #FFA726);
+            color: white;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(45deg, #FF6B6B, #FF8A80);
+            color: white;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn:disabled {
+            background: #666;
+            color: #999;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .success-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(76, 175, 80, 0.9);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            animation: fadeInOut 3s ease-in-out;
+        }
+        
+        .success-content {
+            text-align: center;
+            color: white;
+            max-width: 400px;
+            padding: 20px;
+        }
+        
+        .success-content h2 {
+            font-size: 36px;
+            margin-bottom: 15px;
+            animation: bounce 1s ease-in-out;
+        }
+        
+        .success-content p {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        
+        .success-stats {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 0; }
+            15%, 85% { opacity: 1; }
+        }
+        
+        .help-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1500;
+            padding: 20px;
+        }
+        
+        .help-modal.show {
+            display: flex;
+        }
+        
+        .help-content {
+            background: linear-gradient(145deg, #667eea, #764ba2);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        }
+        
+        .help-content h2 {
+            color: #FFD700;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 24px;
+        }
+        
+        .help-section {
+            margin-bottom: 25px;
+        }
+        
+        .help-section h3 {
+            color: #FFA726;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        
+        .help-section p, .help-section li {
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+        
+        .help-section ul {
+            padding-left: 20px;
+        }
+        
+        .formula-box {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            text-align: center;
+            border-left: 4px solid #FFD700;
+        }
+        
+        .close-help {
+            background: linear-gradient(45deg, #FF6B6B, #FF8A80);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 25px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+            margin-top: 20px;
+            transition: all 0.2s ease;
+        }
+        
+        .close-help:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .title {
+                font-size: 24px;
+            }
+            
+            .scroll-indicator.show {
+                display: block;
+            }
+            
+            .kenken-cell {
+                width: 45px;
+                height: 45px;
+                font-size: 18px;
+                border-width: 3px;
+            }
+            
+            .cage-label {
+                font-size: 9px;
+                padding: 2px 3px;
+            }
+            
+            .cell-number {
+                font-size: 18px;
+            }
+            
+            .controls {
+                flex-direction: column;
+            }
+            
+            .btn {
+                min-width: auto;
+            }
+            
+            .operation-examples {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .kenken-cell {
+                width: 40px;
+                height: 40px;
+                font-size: 16px;
+                border-width: 2px;
+            }
+            
+            .cage-label {
+                font-size: 8px;
+                padding: 1px 2px;
+            }
+            
+            .cell-number {
+                font-size: 16px;
+            }
+            
+            .info-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .difficulty-selector {
+                flex-direction: column;
+                gap: 5px;
+            }
+            
+            .difficulty-btn {
+                min-width: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">🧮 KENKEN</h1>
+            <p class="subtitle">El desafío matemático-lógico japonés</p>
+        </div>
+        
+        <!-- Instrucciones colapsables -->
+        <div class="collapsible-section" id="instructionsSection">
+            <div class="section-header" onclick="toggleSection('instructions')">
+                <span>🎯 Cómo jugar</span>
+                <span class="section-icon">🔽</span>
+            </div>
+            <div class="section-content instructions" id="instructionsContent">
+                <h3>📝 Reglas básicas:</h3>
+                <ul>
+                    <li><strong>Números únicos:</strong> Cada fila y columna debe contener los números 1-N (sin repetir)</li>
+                    <li><strong>Cages matemáticas:</strong> Los grupos de celdas (cages) deben cumplir la operación indicada</li>
+                    <li><strong>Una sola solución:</strong> Solo hay una forma correcta de completar cada puzzle</li>
+                </ul>
+                
+                <h3>🔢 Operaciones:</h3>
+                <div class="operation-examples">
+                    <div class="example-box">
+                        <div class="example-op">6+</div>
+                        <div class="example-desc">Las celdas suman 6</div>
+                    </div>
+                    <div class="example-box">
+                        <div class="example-op">3-</div>
+                        <div class="example-desc">Diferencia entre celdas = 3</div>
+                    </div>
+                    <div class="example-box">
+                        <div class="example-op">12×</div>
+                        <div class="example-desc">Las celdas multiplicadas = 12</div>
+                    </div>
+                    <div class="example-box">
+                        <div class="example-op">2÷</div>
+                        <div class="example-desc">Una celda ÷ otra = 2</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Stats colapsables -->
+        <div class="collapsible-section" id="statsSection">
+            <div class="section-header" onclick="toggleSection('stats')">
+                <span>📊 Estadísticas & Nivel</span>
+                <span class="section-icon">🔽</span>
+            </div>
+            <div class="section-content game-info" id="statsContent">
+                <div class="info-grid">
+                    <div class="info-item level-info">
+                        <div class="info-label">Tamaño</div>
+                        <div class="info-value" id="levelDisplay">4×4</div>
+                    </div>
+                    <div class="info-item time-info">
+                        <div class="info-label">Tiempo</div>
+                        <div class="info-value" id="timeDisplay">00:00</div>
+                    </div>
+                    <div class="info-item errors-info">
+                        <div class="info-label">Errores</div>
+                        <div class="info-value" id="errorsDisplay">0</div>
+                    </div>
+                    <div class="info-item progress-info">
+                        <div class="info-label">Progreso</div>
+                        <div class="info-value" id="progressDisplay">0%</div>
+                    </div>
+                </div>
+                
+                <div class="difficulty-selector" id="difficultySelector">
+                    <button class="difficulty-btn" data-size="3">3×3</button>
+                    <button class="difficulty-btn active" data-size="4">4×4</button>
+                    <button class="difficulty-btn" data-size="5">5×5</button>
+                    <button class="difficulty-btn" data-size="6">6×6</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="game-board">
+            <div class="kenken-grid" id="kenkenGrid">
+                <!-- Se genera dinámicamente -->
+            </div>
+        </div>
+        
+        <div class="number-input">
+            <div class="input-label">Selecciona un número:</div>
+            <div class="number-grid" id="numberGrid">
+                <!-- Se genera dinámicamente -->
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button class="btn btn-primary" onclick="newPuzzle()">🎲 Nuevo Puzzle</button>
+            <button class="btn btn-secondary" onclick="clearCell()">🗑️ Borrar</button>
+            <button class="btn btn-success" onclick="showHelp()">❓ Ayuda</button>
+            <button class="btn btn-warning" onclick="getHint()">💡 Pista</button>
+            <button class="btn btn-danger" onclick="confirmBack()">🏠 Menú</button>
+        </div>
+    </div>
+    
+    <!-- Indicador de scroll para mobile -->
+    <div class="scroll-indicator" id="scrollIndicator">⬇️</div>
+    
+    <div class="success-animation" id="successAnimation">
+        <div class="success-content">
+            <h2>🎉 ¡PUZZLE RESUELTO!</h2>
+            <p id="successMessage">¡Excelente trabajo matemático!</p>
+            <div class="success-stats" id="successStats">
+                <!-- Se llena dinámicamente -->
+            </div>
+        </div>
+    </div>
+    
+    <div class="help-modal" id="helpModal">
+        <div class="help-content">
+            <h2>🧮 Guía Completa de KenKen</h2>
+            
+            <div class="help-section">
+                <h3>🎯 ¿Qué es KenKen?</h3>
+                <p>KenKen es un puzzle matemático japonés que combina lógica como Sudoku con aritmética básica. Fue inventado por Tetsuya Miyamoto en 2004.</p>
+            </div>
+            
+            <div class="help-section">
+                <h3>📋 Reglas del Juego</h3>
+                <ul>
+                    <li><strong>Regla Sudoku:</strong> Cada fila y columna debe contener los números 1 a N exactamente una vez</li>
+                    <li><strong>Regla Matemática:</strong> Cada "cage" (grupo de celdas con borde grueso) debe cumplir la operación matemática indicada</li>
+                    <li><strong>Sin repetición en cages:</strong> Los números no pueden repetirse dentro de una misma cage</li>
+                </ul>
+            </div>
+            
+            <div class="help-section">
+                <h3>🔢 Operaciones Matemáticas</h3>
+                <div class="formula-box">
+                    <p><strong>Suma (+):</strong> Todas las celdas de la cage suman el número objetivo</p>
+                    <p><strong>Resta (-):</strong> La diferencia entre la celda mayor y menor es el objetivo</p>
+                    <p><strong>Multiplicación (×):</strong> El producto de todas las celdas es el objetivo</p>
+                    <p><strong>División (÷):</strong> Una celda dividida por otra da el resultado objetivo</p>
+                </div>
+            </div>
+            
+            <div class="help-section">
+                <h3>💡 Estrategias</h3>
+                <ul>
+                    <li><strong>Empezar por cages pequeñas:</strong> Las de una sola celda son obvias</li>
+                    <li><strong>Buscar restricciones:</strong> Si una cage de 2 celdas suma 3 en un 4×4, debe ser 1+2</li>
+                    <li><strong>Usar eliminación:</strong> Si ya hay un 3 en la fila, no puede haber otro</li>
+                    <li><strong>Factorización:</strong> Para multiplicaciones, piensa en los factores posibles</li>
+                </ul>
+            </div>
+            
+            <div class="help-section">  
+                <h3>🎮 Controles</h3>
+                <p><strong>Seleccionar celda:</strong> Haz clic en cualquier celda vacía</p>
+                <p><strong>Introducir número:</strong> Haz clic en el número deseado abajo</p>
+                <p><strong>Borrar:</strong> Usa el botón "Borrar" o selecciona el mismo número</p>
+                <p><strong>Pista:</strong> El botón "Pista" te ayuda con la celda seleccionada</p>
+            </div>
+            
+            <button class="close-help" onclick="hideHelp()">✅ ¡Entendido!</button>
+        </div>
+    </div>
+    
+    <!-- Modal de confirmación -->
+    <div class="help-modal" id="confirmModal">
+        <div class="help-content" style="max-width: 400px;">
+            <h2 id="confirmTitle">🏠 Volver al Menú</h2>
+            <div class="help-section">
+                <p id="confirmMessage">¿Seguro que quieres volver al menú principal? Se perderá el progreso actual.</p>
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="close-help" onclick="confirmGoBack()" style="background: linear-gradient(45deg, #4CAF50, #66BB6A);">✅ Sí, Volver</button>
+                <button class="close-help" onclick="hideConfirm()" style="background: linear-gradient(45deg, #FF6B6B, #FF8A80);">❌ Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class KenKenGame {
+            constructor() {
+                this.size = 4;
+                this.grid = [];
+                this.solution = [];
+                this.cages = [];
+                this.selectedCell = null;
+                this.startTime = null;
+                this.gameCompleted = false;
+                this.errors = 0;
+                this.gameData = this.loadGameData();
+                
+                this.initializeGame();
+                this.setupEventListeners();
+                this.setupCollapsibleSections();
+                this.setupScrollIndicator();
+                this.updateTimer();
+            }
+            
+            setupCollapsibleSections() {
+                // En mobile, colapsar por defecto las instrucciones
+                if (window.innerWidth <= 768) {
+                    this.toggleSection('instructions', false);
+                    this.toggleSection('stats', false);
+                } else {
+                    // En desktop, mostrar por defecto
+                    this.toggleSection('instructions', true);
+                    this.toggleSection('stats', true);
+                }
+            }
+            
+            setupScrollIndicator() {
+                let scrollTimeout;
+                const indicator = document.getElementById('scrollIndicator');
+                
+                const checkScroll = () => {
+                    if (window.innerWidth <= 768) {
+                        const hasScroll = document.body.scrollHeight > window.innerHeight;
+                        const isAtTop = window.scrollY < 100;
+                        
+                        if (hasScroll && isAtTop) {
+                            indicator.classList.add('show');
+                            
+                            clearTimeout(scrollTimeout);
+                            scrollTimeout = setTimeout(() => {
+                                indicator.classList.remove('show');
+                            }, 3000);
+                        } else {
+                            indicator.classList.remove('show');
+                        }
+                    }
+                };
+                
+                setTimeout(checkScroll, 1000);
+                window.addEventListener('scroll', checkScroll);
+                window.addEventListener('resize', checkScroll);
+            }
+            
+            toggleSection(sectionName, forceState = null) {
+                const section = document.getElementById(sectionName + 'Section');
+                const content = document.getElementById(sectionName + 'Content');
+                
+                if (!section || !content) return;
+                
+                if (forceState !== null) {
+                    if (forceState) {
+                        section.classList.remove('collapsed');
+                        content.classList.add('active');
+                    } else {
+                        section.classList.add('collapsed');
+                        content.classList.remove('active');
+                    }
+                } else {
+                    section.classList.toggle('collapsed');
+                    content.classList.toggle('active');
+                }
+            }
+            
+            loadGameData() {
+                try {
+                    const saved = localStorage.getItem('kenken-progress');
+                    if (saved) {
+                        return JSON.parse(saved);
+                    }
+                } catch (e) {
+                    console.log('Error loading game data:', e);
+                }
+                return {
+                    bestTimes: {},
+                    gamesCompleted: 0,
+                    totalTime: 0
+                };
+            }
+            
+            saveGameData() {
+                try {
+                    const timeElapsed = this.startTime ? Date.now() - this.startTime : 0;
+                    const key = `${this.size}x${this.size}`;
+                    
+                    if (!this.gameData.bestTimes[key] || timeElapsed < this.gameData.bestTimes[key]) {
+                        this.gameData.bestTimes[key] = timeElapsed;
+                    }
+                    
+                    this.gameData.gamesCompleted++;
+                    this.gameData.totalTime += timeElapsed;
+                    
+                    localStorage.setItem('kenken-progress', JSON.stringify(this.gameData));
+                } catch (e) {
+                    console.log('Error saving game data:', e);
+                }
+            }
+            
+            setupEventListeners() {
+                // Botones de dificultad
+                document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        if (this.gameCompleted) return;
+                        
+                        document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('active'));
+                        e.target.classList.add('active');
+                        
+                        this.size = parseInt(e.target.dataset.size);
+                        this.initializeGame();
+                    });
+                });
+                
+                // Cerrar modales al hacer clic fuera
+                const helpModal = document.getElementById('helpModal');
+                if (helpModal) {
+                    helpModal.addEventListener('click', (e) => {
+                        if (e.target === e.currentTarget) {
+                            hideHelp();
+                        }
+                    });
+                }
+                
+                const confirmModal = document.getElementById('confirmModal');
+                if (confirmModal) {
+                    confirmModal.addEventListener('click', (e) => {
+                        if (e.target === e.currentTarget) {
+                            hideConfirm();
+                        }
+                    });
+                }
+            }
+            
+            initializeGame() {
+                this.grid = Array(this.size).fill().map(() => Array(this.size).fill(0));
+                this.selectedCell = null;
+                this.startTime = Date.now();
+                this.gameCompleted = false;
+                this.errors = 0;
+                
+                this.generatePuzzle();
+                this.renderGrid();
+                this.renderNumberInput();
+                this.updateUI();
+            }
+            
+            generatePuzzle() {
+                // Crear una solución simple válida
+                this.solution = this.createSimpleSolution();
+                
+                // Crear cages simples
+                this.cages = this.createSimpleCages();
+                
+                // Limpiar grid del jugador
+                this.grid = Array(this.size).fill().map(() => Array(this.size).fill(0));
+            }
+            
+            createSimpleSolution() {
+                const solution = [];
+                
+                // Crear una solución válida de Latin Square
+                for (let row = 0; row < this.size; row++) {
+                    solution[row] = [];
+                    for (let col = 0; col < this.size; col++) {
+                        solution[row][col] = ((row + col) % this.size) + 1;
+                    }
+                }
+                
+                // Aplicar algunas permutaciones para hacer más interesante
+                this.shuffleRows(solution);
+                this.shuffleColumns(solution);
+                
+                return solution;
+            }
+            
+            shuffleRows(matrix) {
+                // Intercambiar algunas filas aleatoriamente
+                for (let i = 0; i < 3; i++) {
+                    const row1 = Math.floor(Math.random() * this.size);
+                    const row2 = Math.floor(Math.random() * this.size);
+                    if (row1 !== row2) {
+                        [matrix[row1], matrix[row2]] = [matrix[row2], matrix[row1]];
+                    }
+                }
+            }
+            
+            shuffleColumns(matrix) {
+                // Intercambiar algunas columnas aleatoriamente
+                for (let i = 0; i < 3; i++) {
+                    const col1 = Math.floor(Math.random() * this.size);
+                    const col2 = Math.floor(Math.random() * this.size);
+                    if (col1 !== col2) {
+                        for (let row = 0; row < this.size; row++) {
+                            [matrix[row][col1], matrix[row][col2]] = [matrix[row][col2], matrix[row][col1]];
+                        }
+                    }
+                }
+            }
+            
+            createSimpleCages() {
+                const cages = [];
+                const used = Array(this.size).fill().map(() => Array(this.size).fill(false));
+                let cageId = 0;
+                
+                // Crear cages priorizando tamaños de 2-3 celdas
+                for (let row = 0; row < this.size; row++) {
+                    for (let col = 0; col < this.size; col++) {
+                        if (!used[row][col]) {
+                            const cage = this.createMathematicalCage(row, col, used, cageId);
+                            if (cage && cage.cells.length > 0) {
+                                cages.push(cage);
+                                cageId++;
+                            }
+                        }
+                    }
+                }
+                
+                return cages;
+            }
+            
+            createMathematicalCage(startRow, startCol, used, cageId) {
+                const cage = {
+                    id: cageId,
+                    cells: [{ row: startRow, col: startCol }],
+                    operation: '',
+                    target: 0
+                };
+                
+                used[startRow][startCol] = true;
+                
+                // FORZAR cages de 2+ celdas (90% de probabilidad)
+                // Solo permitir cages de 1 celda en casos muy específicos
+                const shouldExpand = Math.random() < 0.9;
+                
+                if (shouldExpand) {
+                    const directions = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+                    const availableDirections = [];
+                    
+                    // Encontrar todas las direcciones disponibles
+                    for (const [dr, dc] of directions) {
+                        const newRow = startRow + dr;
+                        const newCol = startCol + dc;
+                        
+                        if (newRow >= 0 && newRow < this.size && 
+                            newCol >= 0 && newCol < this.size && 
+                            !used[newRow][newCol]) {
+                            availableDirections.push([dr, dc]);
+                        }
+                    }
+                    
+                    // Intentar agregar al menos 1 celda, máximo 2
+                    if (availableDirections.length > 0) {
+                        // Agregar primera celda
+                        const [dr1, dc1] = availableDirections[Math.floor(Math.random() * availableDirections.length)];
+                        const newRow1 = startRow + dr1;
+                        const newCol1 = startCol + dc1;
+                        cage.cells.push({ row: newRow1, col: newCol1 });
+                        used[newRow1][newCol1] = true;
+                        
+                        // 40% de probabilidad de agregar una segunda celda
+                        if (Math.random() < 0.4) {
+                            const remainingDirections = [];
+                            
+                            // Buscar desde ambas celdas existentes
+                            for (const existingCell of cage.cells) {
+                                for (const [dr, dc] of directions) {
+                                    const newRow = existingCell.row + dr;
+                                    const newCol = existingCell.col + dc;
+                                    
+                                    if (newRow >= 0 && newRow < this.size && 
+                                        newCol >= 0 && newCol < this.size && 
+                                        !used[newRow][newCol] && 
+                                        !cage.cells.find(c => c.row === newRow && c.col === newCol)) {
+                                        remainingDirections.push([newRow, newCol]);
+                                    }
+                                }
+                            }
+                            
+                            if (remainingDirections.length > 0) {
+                                const [newRow2, newCol2] = remainingDirections[Math.floor(Math.random() * remainingDirections.length)];
+                                cage.cells.push({ row: newRow2, col: newCol2 });
+                                used[newRow2][newCol2] = true;
+                            }
+                        }
+                    }
+                }
+                
+                // Calcular operación y objetivo
+                this.calculateCageValues(cage);
+                
+                return cage;
+            }
+            
+            calculateCageValues(cage) {
+                const values = cage.cells.map(cell => this.solution[cell.row][cell.col]);
+                
+                if (cage.cells.length === 1) {
+                    // ¡EVITAR cages de una sola celda! 
+                    // Si aparece una, convertirla en una restricción más difícil
+                    cage.operation = '';
+                    cage.target = values[0];
+                    console.warn('Cage de 1 celda creada - no debería pasar frecuentemente');
+                } else if (cage.cells.length === 2) {
+                    // Cage de dos celdas - SIEMPRE con operación matemática
+                    const val1 = values[0];
+                    const val2 = values[1];
+                    const max = Math.max(val1, val2);
+                    const min = Math.min(val1, val2);
+                    
+                    const possibleOps = [];
+                    
+                    // Suma
+                    possibleOps.push({op: '+', result: val1 + val2, weight: 3});
+                    
+                    // Resta (solo si da resultado > 1)
+                    if (max > min && max - min > 1) {
+                        possibleOps.push({op: '-', result: max - min, weight: 2});
+                    }
+                    
+                    // Multiplicación (si no es muy grande)
+                    const product = val1 * val2;
+                    if (product <= 20 && product > 2) {
+                        possibleOps.push({op: '×', result: product, weight: 2});
+                    }
+                    
+                    // División (solo si es exacta y > 1)
+                    if (min !== 0 && max % min === 0 && max / min > 1) {
+                        possibleOps.push({op: '÷', result: max / min, weight: 1});
+                    }
+                    
+                    // Selección ponderada
+                    const totalWeight = possibleOps.reduce((sum, op) => sum + op.weight, 0);
+                    let random = Math.random() * totalWeight;
+                    
+                    for (const op of possibleOps) {
+                        random -= op.weight;
+                        if (random <= 0) {
+                            cage.operation = op.op;
+                            cage.target = op.result;
+                            break;
+                        }
+                    }
+                    
+                    // Fallback a suma si no se seleccionó nada
+                    if (!cage.operation) {
+                        cage.operation = '+';
+                        cage.target = val1 + val2;
+                    }
+                    
+                } else {
+                    // 3+ celdas - preferir suma, ocasionalmente multiplicación
+                    const sum = values.reduce((a, b) => a + b, 0);
+                    const product = values.reduce((a, b) => a * b, 1);
+                    
+                    // Multiplicación solo si el resultado es razonable
+                    if (product <= 30 && product >= 6 && Math.random() < 0.25) {
+                        cage.operation = '×';
+                        cage.target = product;
+                    } else {
+                        cage.operation = '+';
+                        cage.target = sum;
+                    }
+                }
+            }
+            
+            renderGrid() {
+                const grid = document.getElementById('kenkenGrid');
+                if (!grid) return;
+                
+                grid.innerHTML = '';
+                grid.style.gridTemplateColumns = `repeat(${this.size}, 1fr)`;
+                grid.style.gridTemplateRows = `repeat(${this.size}, 1fr)`;
+                
+                for (let row = 0; row < this.size; row++) {
+                    for (let col = 0; col < this.size; col++) {
+                        const cell = document.createElement('div');
+                        cell.className = 'kenken-cell';
+                        cell.dataset.row = row;
+                        cell.dataset.col = col;
+                        
+                        // Encontrar la cage de esta celda
+                        const cage = this.cages.find(c => 
+                            c.cells.some(cageCell => cageCell.row === row && cageCell.col === col)
+                        );
+                        
+                        if (cage) {
+                            cell.classList.add(`cage-${cage.id % 10}`);
+                            
+                            // SIEMPRE agregar label de la cage en la primera celda
+                            if (cage.cells[0].row === row && cage.cells[0].col === col) {
+                                const label = document.createElement('div');
+                                label.className = 'cage-label';
+                                
+                                // Mostrar operación más claramente
+                                if (cage.operation) {
+                                    label.textContent = cage.target + cage.operation;
+                                } else {
+                                    // Para cages de una sola celda, solo el número
+                                    label.textContent = cage.target.toString();
+                                }
+                                
+                                cell.appendChild(label);
+                            }
+                        }
+                        
+                        // Mostrar número si está lleno - usando span para no interferir con el label
+                        if (this.grid[row][col] !== 0) {
+                            const numberSpan = document.createElement('span');
+                            numberSpan.className = 'cell-number';
+                            numberSpan.textContent = this.grid[row][col];
+                            cell.appendChild(numberSpan);
+                        }
+                        
+                        cell.addEventListener('click', () => this.selectCell(row, col));
+                        grid.appendChild(cell);
+                    }
+                }
+            }
+            
+            renderNumberInput() {
+                const numberGrid = document.getElementById('numberGrid');
+                if (!numberGrid) return;
+                
+                numberGrid.innerHTML = '';
+                
+                // Crear botones para números 1-N
+                for (let i = 1; i <= this.size; i++) {
+                    const btn = document.createElement('button');
+                    btn.className = 'number-btn';
+                    btn.textContent = i;
+                    btn.addEventListener('click', () => this.inputNumber(i));
+                    numberGrid.appendChild(btn);
+                }
+                
+                // Botón para borrar
+                const clearBtn = document.createElement('button');
+                clearBtn.className = 'number-btn';
+                clearBtn.textContent = '×';
+                clearBtn.style.background = 'linear-gradient(45deg, #FF6B6B, #FF8A80)';
+                clearBtn.addEventListener('click', () => this.inputNumber(0));
+                numberGrid.appendChild(clearBtn);
+            }
+            
+            selectCell(row, col) {
+                if (this.gameCompleted) return;
+                
+                // Limpiar selección anterior
+                document.querySelectorAll('.kenken-cell').forEach(cell => {
+                    cell.classList.remove('selected');
+                });
+                
+                // Seleccionar nueva celda
+                this.selectedCell = { row, col };
+                const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+                if (cell) {
+                    cell.classList.add('selected');
+                }
+            }
+            
+            inputNumber(number) {
+                if (!this.selectedCell || this.gameCompleted) return;
+                
+                const { row, col } = this.selectedCell;
+                
+                // Si es el mismo número, borrarlo (toggle)
+                if (this.grid[row][col] === number && number !== 0) {
+                    this.grid[row][col] = 0;
+                } else {
+                    this.grid[row][col] = number;
+                }
+                
+                this.renderGrid();
+                this.validateMove(row, col);
+                this.updateUI();
+                this.checkCompletion();
+                
+                // Mantener la celda seleccionada
+                this.selectCell(row, col);
+            }
+            
+            validateMove(row, col) {
+                const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+                if (!cell) return;
+                
+                const value = this.grid[row][col];
+                
+                if (value === 0) {
+                    cell.classList.remove('error', 'completed');
+                    return;
+                }
+                
+                let isValid = true;
+                
+                // Verificar fila (no repetir números)
+                for (let c = 0; c < this.size; c++) {
+                    if (c !== col && this.grid[row][c] === value) {
+                        isValid = false;
+                        break;
+                    }
+                }
+                
+                // Verificar columna (no repetir números)
+                for (let r = 0; r < this.size; r++) {
+                    if (r !== row && this.grid[r][col] === value) {
+                        isValid = false;
+                        break;
+                    }
+                }
+                
+                if (isValid) {
+                    cell.classList.remove('error');
+                    cell.classList.add('completed');
+                } else {
+                    cell.classList.add('error');
+                    cell.classList.remove('completed');
+                    this.errors++;
+                }
+            }
+            
+            checkCompletion() {
+                // Verificar si todas las celdas están llenas
+                const allFilled = this.grid.every(row => row.every(cell => cell !== 0));
+                
+                if (allFilled) {
+                    // Verificar si es una solución válida
+                    const isValid = this.isValidSolution();
+                    
+                    if (isValid) {
+                        this.gameCompleted = true;
+                        this.saveGameData();
+                        this.showSuccessAnimation();
+                    }
+                }
+            }
+            
+            isValidSolution() {
+                // Verificar filas y columnas
+                for (let i = 0; i < this.size; i++) {
+                    const row = this.grid[i];
+                    const col = this.grid.map(r => r[i]);
+                    
+                    if (!this.isValidSequence(row) || !this.isValidSequence(col)) {
+                        return false;
+                    }
+                }
+                
+                // Verificar cages
+                for (const cage of this.cages) {
+                    if (!this.isCageValid(cage)) {
+                        return false;
+                    }
+                }
+                
+                return true;
+            }
+            
+            isValidSequence(sequence) {
+                const sorted = [...sequence].sort((a, b) => a - b);
+                for (let i = 0; i < this.size; i++) {
+                    if (sorted[i] !== i + 1) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+            
+            isCageValid(cage) {
+                const values = cage.cells.map(({ row, col }) => this.grid[row][col]);
+                
+                switch (cage.operation) {
+                    case '+':
+                        return values.reduce((a, b) => a + b, 0) === cage.target;
+                    case '-':
+                        return Math.abs(values[0] - values[1]) === cage.target;
+                    case '×':
+                        return values.reduce((a, b) => a * b, 1) === cage.target;
+                    case '÷':
+                        const max = Math.max(...values);
+                        const min = Math.min(...values);
+                        return max / min === cage.target;
+                    case '':
+                        return values[0] === cage.target;
+                    default:
+                        return false;
+                }
+            }
+            
+            showSuccessAnimation() {
+                const animation = document.getElementById('successAnimation');
+                const message = document.getElementById('successMessage');
+                const stats = document.getElementById('successStats');
+                
+                if (!animation || !message || !stats) return;
+                
+                const timeElapsed = this.startTime ? Date.now() - this.startTime : 0;
+                const minutes = Math.floor(timeElapsed / 60000);
+                const seconds = Math.floor((timeElapsed % 60000) / 1000);
+                
+                message.textContent = `¡Has resuelto el KenKen ${this.size}×${this.size}!`;
+                
+                stats.innerHTML = `
+                    <p><strong>Tiempo:</strong> ${minutes}:${seconds.toString().padStart(2, '0')}</p>
+                    <p><strong>Errores:</strong> ${this.errors}</p>
+                    <p><strong>Tamaño:</strong> ${this.size}×${this.size}</p>
+                    ${this.errors === 0 ? '<p style="color: #FFD700;">🏆 ¡PERFECTO! Sin errores</p>' : ''}
+                `;
+                
+                animation.style.display = 'flex';
+                
+                setTimeout(() => {
+                    animation.style.display = 'none';
+                }, 3000);
+            }
+            
+            getHint() {
+                if (!this.selectedCell || this.gameCompleted) return;
+                
+                const { row, col } = this.selectedCell;
+                const correctValue = this.solution[row][col];
+                
+                // Mostrar el valor correcto
+                this.grid[row][col] = correctValue;
+                this.renderGrid();
+                this.validateMove(row, col);
+                this.updateUI();
+                this.checkCompletion();
+                
+                // Mantener la celda seleccionada
+                this.selectCell(row, col);
+            }
+            
+            clearCell() {
+                if (!this.selectedCell || this.gameCompleted) return;
+                
+                const { row, col } = this.selectedCell;
+                this.grid[row][col] = 0;
+                this.renderGrid();
+                this.updateUI();
+                
+                // Mantener la celda seleccionada
+                this.selectCell(row, col);
+            }
+            
+            newPuzzle() {
+                this.initializeGame();
+            }
+            
+            updateUI() {
+                const levelDisplay = document.getElementById('levelDisplay');
+                const errorsDisplay = document.getElementById('errorsDisplay');
+                const progressDisplay = document.getElementById('progressDisplay');
+                
+                if (levelDisplay) levelDisplay.textContent = `${this.size}×${this.size}`;
+                if (errorsDisplay) errorsDisplay.textContent = this.errors;
+                
+                // Calcular progreso
+                const totalCells = this.size * this.size;
+                const filledCells = this.grid.flat().filter(cell => cell !== 0).length;
+                const progress = Math.round((filledCells / totalCells) * 100);
+                if (progressDisplay) progressDisplay.textContent = `${progress}%`;
+            }
+            
+            updateTimer() {
+                if (this.startTime && !this.gameCompleted) {
+                    const elapsed = Date.now() - this.startTime;
+                    const minutes = Math.floor(elapsed / 60000);
+                    const seconds = Math.floor((elapsed % 60000) / 1000);
+                    const timeDisplay = document.getElementById('timeDisplay');
+                    if (timeDisplay) {
+                        timeDisplay.textContent = 
+                            `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                    }
+                }
+                
+                requestAnimationFrame(() => this.updateTimer());
+            }
+        }
+        
+        // Funciones globales
+        let game;
+        
+        function initGame() {
+            try {
+                game = new KenKenGame();
+            } catch (e) {
+                console.error('Error initializing game:', e);
+                // Mostrar mensaje de error al usuario
+                const gameBoard = document.getElementById('kenkenGrid');
+                if (gameBoard) {
+                    gameBoard.innerHTML = '<div style="color: white; text-align: center; padding: 20px;">Error al cargar el juego. Intenta recargar la página.</div>';
+                }
+            }
+        }
+        
+        function newPuzzle() {
+            if (game) game.newPuzzle();
+        }
+        
+        function clearCell() {
+            if (game) game.clearCell();
+        }
+        
+        function getHint() {
+            if (game) game.getHint();
+        }
+        
+        function showHelp() {
+            const helpModal = document.getElementById('helpModal');
+            if (helpModal) helpModal.classList.add('show');
+        }
+        
+        function hideHelp() {
+            const helpModal = document.getElementById('helpModal');
+            if (helpModal) helpModal.classList.remove('show');
+        }
+        
+        function showConfirm() {
+            const confirmModal = document.getElementById('confirmModal');
+            if (confirmModal) confirmModal.classList.add('show');
+        }
+        
+        function hideConfirm() {
+            const confirmModal = document.getElementById('confirmModal');
+            if (confirmModal) confirmModal.classList.remove('show');
+        }
+        
+        function confirmGoBack() {
+            window.location.href = '../index.html';
+        }
+        
+        function confirmBack() {
+            if (game && game.startTime && !game.gameCompleted) {
+                showConfirm();
+            } else {
+                window.location.href = '../index.html';
+            }
+        }
+        
+        function toggleSection(sectionName) {
+            if (game) game.toggleSection(sectionName);
+        }
+        
+        // Inicializar cuando la página carga
+        document.addEventListener('DOMContentLoaded', function() {
+            // Pequeño delay para asegurar que todo esté cargado
+            setTimeout(initGame, 100);
+        });
+    </script>
+</body>
+</html>

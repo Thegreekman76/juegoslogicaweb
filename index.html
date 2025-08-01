@@ -65,11 +65,19 @@
         
         .games-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             gap: 30px;
             margin-bottom: 40px;
             max-width: 1200px;
             margin: 0 auto 40px;
+        }
+        
+        @media (max-width: 1200px) {
+            .games-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 25px;
+                max-width: 900px;
+            }
         }
         
         @media (max-width: 1024px) {
@@ -170,6 +178,13 @@
             -webkit-text-fill-color: transparent;
         }
         
+        .kenken .game-icon {
+            background: linear-gradient(45deg, #667eea, #764ba2, #f093fb);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
         .game-title {
             font-size: 32px;
             font-weight: bold;
@@ -203,6 +218,10 @@
         
         .game24 .game-title {
             color: #FF6B6B;
+        }
+        
+        .kenken .game-title {
+            color: #667eea;
         }
         
         .game-description {
@@ -281,6 +300,11 @@
         
         .game24 .play-button {
             background: linear-gradient(45deg, #FF6B6B, #FF9500, #FFD700);
+            color: white;
+        }
+        
+        .kenken .play-button {
+            background: linear-gradient(45deg, #667eea, #764ba2, #f093fb);
             color: white;
         }
         
@@ -569,6 +593,7 @@
         .game-card:nth-child(5) { animation-delay: 0.5s; }
         .game-card:nth-child(6) { animation-delay: 0.6s; }
         .game-card:nth-child(7) { animation-delay: 0.7s; }
+        .game-card:nth-child(8) { animation-delay: 0.8s; }
         
         @keyframes fadeInUp {
             to {
@@ -628,7 +653,7 @@
             <h1 class="main-title">🎮 JUEGOS DE LÓGICA</h1>
             <p class="subtitle">Greek Collection - Desafía tu mente</p>
             <p class="description">
-                Colección de siete juegos clásicos de lógica con diseño moderno. 
+                Colección de ocho juegos clásicos de lógica con diseño moderno. 
                 Desde rompecabezas de luces hasta Sudoku, desafíos matemáticos y estrategias, 
                 cada juego pondrá a prueba diferentes aspectos de tu inteligencia.
             </p>
@@ -774,6 +799,26 @@
                     🎮 Jugar 2048
                 </button>
             </div>
+            
+            <!-- KenKen Game -->
+            <div class="game-card kenken">
+                <div class="game-icon">🧮</div>
+                <h2 class="game-title">KENKEN</h2>
+                <p class="game-description">
+                    El desafío matemático perfecto. Combina lógica como Sudoku 
+                    con operaciones aritméticas en grupos coloreados.
+                </p>
+                <ul class="game-features">
+                    <li>Grillas de 3×3 hasta 6×6</li>
+                    <li>Las 4 operaciones (+, -, ×, ÷)</li>
+                    <li>Generador de puzzles únicos</li>
+                    <li>Sistema de pistas inteligente</li>
+                    <li>Cronometraje y estadísticas</li>
+                </ul>
+                <button class="play-button" onclick="playGame('KenKenGreekManWeb')">
+                    🧮 Jugar KenKen
+                </button>
+            </div>
         </div>
         
         <!-- Sección de donaciones -->
@@ -803,7 +848,7 @@
             <h3 class="stats-title">📊 Estadísticas de la Colección</h3>
             <div class="stats-grid">
                 <div class="stat-item">
-                    <div class="stat-number" style="color: #FFD700;">7</div>
+                    <div class="stat-number" style="color: #FFD700;">8</div>
                     <div class="stat-label">Juegos Únicos</div>
                 </div>
                 <div class="stat-item">
