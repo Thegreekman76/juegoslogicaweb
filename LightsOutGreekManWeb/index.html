@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💡 Lights Out - Logic Game</title>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+            color: white;
+            min-height: 100vh;
+            padding-bottom: 20px;
+        }
+        
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 15px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .title {
+            font-size: 28px;
+            color: #FF9800;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(255, 152, 0, 0.5);
+        }
+        
+        /* Secciones colapsables */
+        .collapsible-section {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            margin-bottom: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            overflow: hidden;
+        }
+        
+        .section-header {
+            padding: 12px 15px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            background: rgba(255, 255, 255, 0.1);
+            transition: background 0.2s ease;
+        }
+        
+        .section-header:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        .section-icon {
+            font-size: 16px;
+            transition: transform 0.3s ease;
+        }
+        
+        .section-content {
+            padding: 15px;
+            display: none;
+            animation: slideDown 0.3s ease;
+        }
+        
+        .section-content.active {
+            display: block;
+        }
+        
+        .collapsible-section.collapsed .section-icon {
+            transform: rotate(-90deg);
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .level-info {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .level-text {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .moves-counter {
+            font-size: 16px;
+            color: #FFD700;
+        }
+        
+        .best-score {
+            font-size: 14px;
+            color: #4CAF50;
+        }
+        
+        .game-board {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        
+        .grid {
+            display: grid;
+            gap: 4px;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        
+        .light {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .light::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.3s ease;
+        }
+        
+        .light.off {
+            background: linear-gradient(145deg, #2a2a2a, #1a1a1a);
+            box-shadow: inset 5px 5px 10px #0a0a0a, inset -5px -5px 10px #3a3a3a;
+        }
+        
+        .light.off::before {
+            background: #333;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+        }
+        
+        .light.on {
+            background: linear-gradient(145deg, #FFD700, #FF9800);
+            box-shadow: 0 0 20px rgba(255, 193, 7, 0.8), inset 2px 2px 5px rgba(255, 255, 255, 0.3);
+            border-color: #FFD700;
+        }
+        
+        .light.on::before {
+            background: radial-gradient(circle, #FFEB3B, #FF9800);
+            box-shadow: 0 0 15px rgba(255, 235, 59, 0.9);
+        }
+        
+        .light:hover {
+            transform: scale(1.05);
+        }
+        
+        .light:active {
+            transform: scale(0.95);
+        }
+        
+        .controls {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            flex: 1;
+            min-width: 80px;
+            padding: 12px 8px;
+            border: none;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(45deg, #FF9800, #FF5722);
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(45deg, #607D8B, #455A64);
+            color: white;
+        }
+        
+        .btn-success {
+            background: linear-gradient(45deg, #4CAF50, #2E7D32);
+            color: white;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(45deg, #FF6B6B, #FF8E53);
+            color: white;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .level-selector {
+            display: none;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .level-selector.active {
+            display: block;
+        }
+        
+        .level-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .level-btn {
+            aspect-ratio: 1;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .level-btn.unlocked {
+            background: linear-gradient(45deg, #4CAF50, #2E7D32);
+            color: white;
+        }
+        
+        .level-btn.completed {
+            background: linear-gradient(45deg, #FFD700, #FF9800);
+            color: #1a1a2e;
+        }
+        
+        .level-btn.current {
+            background: linear-gradient(45deg, #FF5722, #D32F2F);
+            color: white;
+            box-shadow: 0 0 20px rgba(255, 87, 34, 0.6);
+        }
+        
+        .level-btn.locked {
+            background: #333;
+            color: #666;
+            cursor: not-allowed;
+        }
+        
+        .level-btn:not(.locked):hover {
+            transform: scale(1.1);
+        }
+        
+        .success-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(76, 175, 80, 0.9);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: fadeInOut 2s ease-in-out;
+        }
+        
+        .success-content {
+            text-align: center;
+            color: white;
+        }
+        
+        .success-content h2 {
+            font-size: 32px;
+            margin-bottom: 10px;
+            animation: bounce 1s ease-in-out;
+        }
+        
+        .success-content p {
+            font-size: 18px;
+        }
+        
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 0; }
+            20%, 80% { opacity: 1; }
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-20px); }
+            60% { transform: translateY(-10px); }
+        }
+        
+        .instructions {
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        .instructions h3 {
+            color: #2196F3;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+        
+        .instructions p {
+            font-size: 13px;
+            line-height: 1.4;
+            margin-bottom: 8px;
+        }
+        
+        .help-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1500;
+            padding: 20px;
+        }
+        
+        .help-modal.show {
+            display: flex;
+        }
+        
+        .help-content {
+            background: linear-gradient(145deg, #1a1a2e, #16213e);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            border: 2px solid rgba(255, 152, 0, 0.3);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        }
+        
+        .help-content h2 {
+            color: #FF9800;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 24px;
+        }
+        
+        .help-section {
+            margin-bottom: 25px;
+        }
+        
+        .help-section h3 {
+            color: #FFD700;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        
+        .help-section p {
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+        
+        .close-help {
+            background: linear-gradient(45deg, #FF6B6B, #FF8E53);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 25px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+            margin-top: 20px;
+            transition: all 0.2s ease;
+        }
+        
+        .close-help:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* Indicador de scroll para mobile */
+        .scroll-indicator {
+            position: fixed;
+            bottom: 15px;
+            right: 15px;
+            background: rgba(255, 152, 0, 0.9);
+            color: #1a1a2e;
+            padding: 8px;
+            border-radius: 50%;
+            font-size: 12px;
+            z-index: 100;
+            animation: bounce 2s infinite;
+            display: none;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .scroll-indicator.show {
+                display: block;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .controls {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .btn {
+                min-width: auto;
+                padding: 12px;
+                font-size: 14px;
+            }
+        }
+        
+        @media (max-width: 320px) {
+            .light {
+                width: 50px;
+                height: 50px;
+            }
+            
+            .container {
+                padding: 15px;
+            }
+        }
+        
+        @media (min-width: 500px) {
+            .light {
+                width: 70px;
+                height: 70px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">💡 LIGHTS OUT</h1>
+        </div>
+        
+        <!-- Instrucciones colapsables -->
+        <div class="collapsible-section" id="instructionsSection">
+            <div class="section-header" onclick="toggleSection('instructions')">
+                <span>🎯 Objetivo</span>
+                <span class="section-icon">🔽</span>
+            </div>
+            <div class="section-content instructions" id="instructionsContent">
+                <p>Apaga todas las luces. Al tocar una luz, ella y sus vecinas cambian de estado. ¡Usa la estrategia!</p>
+            </div>
+        </div>
+        
+        <div class="level-info">
+            <div>
+                <div class="level-text" id="levelText">Nivel 1 (3×3)</div>
+                <div class="best-score" id="bestScore">Mejor: --</div>
+            </div>
+            <div class="moves-counter" id="movesCounter">Movimientos: 0</div>
+        </div>
+        
+        <div class="game-board">
+            <div class="grid" id="gameGrid">
+                <!-- Se genera dinámicamente -->
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button class="btn btn-secondary" onclick="resetLevel()">🔄 Reiniciar</button>
+            <button class="btn btn-primary" onclick="toggleLevelSelector()">📋 Niveles</button>
+            <button class="btn btn-secondary" onclick="newPuzzle()">🎲 Nuevo</button>
+            <button class="btn btn-danger" onclick="confirmBack()">🏠 Menú</button>
+        </div>
+        
+        <div class="level-selector" id="levelSelector">
+            <h3 style="text-align: center; margin-bottom: 15px; color: #FF9800;">Selecciona Nivel</h3>
+            <div class="level-grid" id="levelGrid">
+                <!-- Se genera dinámicamente -->
+            </div>
+            <button class="btn btn-success" onclick="toggleLevelSelector()" style="margin-top: 15px;">✅ Cerrar</button>
+        </div>
+    </div>
+    
+    <!-- Indicador de scroll para mobile -->
+    <div class="scroll-indicator" id="scrollIndicator">⬇️</div>
+    
+    <div class="success-animation" id="successAnimation">
+        <div class="success-content">
+            <h2>🎉 ¡NIVEL COMPLETADO!</h2>
+            <p id="successMessage">¡Excelente trabajo!</p>
+        </div>
+    </div>
+    
+    <!-- Modal de confirmación -->
+    <div class="help-modal" id="confirmModal">
+        <div class="help-content" style="max-width: 400px;">
+            <h2 id="confirmTitle">🏠 Volver al Menú</h2>
+            <div class="help-section">
+                <p id="confirmMessage">¿Seguro que quieres volver al menú principal? Se perderá el progreso actual.</p>
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="close-help" onclick="confirmGoBack()" style="background: linear-gradient(45deg, #4CAF50, #66BB6A);">✅ Sí, Volver</button>
+                <button class="close-help" onclick="hideConfirm()" style="background: linear-gradient(45deg, #FF6B6B, #FF8A80);">❌ Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class LightsOutGame {
+            constructor() {
+                this.currentLevel = 1;
+                this.maxLevel = 15;
+                this.moves = 0;
+                this.grid = [];
+                this.size = 3;
+                this.gameData = this.loadGameData();
+                
+                this.initializeGame();
+                this.setupCollapsibleSections();
+                this.setupScrollIndicator();
+                this.generateLevelSelector();
+                this.setupEventListeners();
+            }
+            
+            setupCollapsibleSections() {
+                // En mobile, colapsar por defecto las instrucciones
+                if (window.innerWidth <= 768) {
+                    this.toggleSection('instructions', false);
+                } else {
+                    // En desktop, mostrar por defecto
+                    this.toggleSection('instructions', true);
+                }
+            }
+            
+            setupScrollIndicator() {
+                let scrollTimeout;
+                const indicator = document.getElementById('scrollIndicator');
+                
+                const checkScroll = () => {
+                    if (window.innerWidth <= 768) {
+                        const hasScroll = document.body.scrollHeight > window.innerHeight;
+                        const isAtTop = window.scrollY < 100;
+                        
+                        if (hasScroll && isAtTop) {
+                            indicator.classList.add('show');
+                            
+                            clearTimeout(scrollTimeout);
+                            scrollTimeout = setTimeout(() => {
+                                indicator.classList.remove('show');
+                            }, 3000);
+                        } else {
+                            indicator.classList.remove('show');
+                        }
+                    }
+                };
+                
+                setTimeout(checkScroll, 1000);
+                window.addEventListener('scroll', checkScroll);
+                window.addEventListener('resize', checkScroll);
+            }
+            
+            toggleSection(sectionName, forceState = null) {
+                const section = document.getElementById(sectionName + 'Section');
+                const content = document.getElementById(sectionName + 'Content');
+                
+                if (!section || !content) return;
+                
+                if (forceState !== null) {
+                    if (forceState) {
+                        section.classList.remove('collapsed');
+                        content.classList.add('active');
+                    } else {
+                        section.classList.add('collapsed');
+                        content.classList.remove('active');
+                    }
+                } else {
+                    section.classList.toggle('collapsed');
+                    content.classList.toggle('active');
+                }
+            }
+            
+            setupEventListeners() {
+                // Cerrar modal de confirmación al hacer clic fuera
+                const confirmModal = document.getElementById('confirmModal');
+                if (confirmModal) {
+                    confirmModal.addEventListener('click', (e) => {
+                        if (e.target === e.currentTarget) {
+                            hideConfirm();
+                        }
+                    });
+                }
+            }
+            
+            loadGameData() {
+                const saved = localStorage.getItem('lightsout-progress');
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    // Convertir array a Set si es necesario
+                    if (Array.isArray(data.completedLevels)) {
+                        data.completedLevels = new Set(data.completedLevels);
+                    }
+                    return data;
+                }
+                return {
+                    unlockedLevels: 1,
+                    bestScores: {},
+                    completedLevels: new Set()
+                };
+            }
+            
+            saveGameData() {
+                const dataToSave = {
+                    unlockedLevels: this.gameData.unlockedLevels,
+                    bestScores: this.gameData.bestScores,
+                    completedLevels: Array.from(this.gameData.completedLevels)
+                };
+                localStorage.setItem('lightsout-progress', JSON.stringify(dataToSave));
+            }
+            
+            initializeGame() {
+                this.setLevelSize();
+                this.createGrid();
+                this.generatePuzzle();
+                this.updateUI();
+            }
+            
+            setLevelSize() {
+                if (this.currentLevel <= 3) {
+                    this.size = 3;
+                } else if (this.currentLevel <= 7) {
+                    this.size = 4;
+                } else if (this.currentLevel <= 12) {
+                    this.size = 5;
+                } else {
+                    this.size = 6;
+                }
+            }
+            
+            createGrid() {
+                const gameGrid = document.getElementById('gameGrid');
+                gameGrid.innerHTML = '';
+                gameGrid.style.gridTemplateColumns = `repeat(${this.size}, 1fr)`;
+                
+                this.grid = Array(this.size).fill().map(() => Array(this.size).fill(false));
+                
+                for (let row = 0; row < this.size; row++) {
+                    for (let col = 0; col < this.size; col++) {
+                        const light = document.createElement('div');
+                        light.className = 'light off';
+                        light.dataset.row = row;
+                        light.dataset.col = col;
+                        light.addEventListener('click', () => this.toggleLight(row, col));
+                        gameGrid.appendChild(light);
+                    }
+                }
+            }
+            
+            generatePuzzle() {
+                // Empezar con todas las luces apagadas
+                this.grid = Array(this.size).fill().map(() => Array(this.size).fill(false));
+                
+                // Hacer movimientos aleatorios para crear un puzzle solucionable
+                const moves = Math.floor(Math.random() * (this.size * this.size)) + this.size;
+                
+                for (let i = 0; i < moves; i++) {
+                    const row = Math.floor(Math.random() * this.size);
+                    const col = Math.floor(Math.random() * this.size);
+                    this.togglePattern(row, col, false); // false = no contar como movimiento del jugador
+                }
+                
+                this.moves = 0;
+                this.updateGrid();
+                this.updateUI();
+            }
+            
+            toggleLight(row, col) {
+                this.togglePattern(row, col, true);
+                this.checkWin();
+            }
+            
+            togglePattern(row, col, countMove = true) {
+                if (countMove) {
+                    this.moves++;
+                }
+                
+                // Toggle la luz central
+                this.grid[row][col] = !this.grid[row][col];
+                
+                // Toggle las luces adyacentes
+                const directions = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+                
+                for (const [dr, dc] of directions) {
+                    const newRow = row + dr;
+                    const newCol = col + dc;
+                    
+                    if (newRow >= 0 && newRow < this.size && newCol >= 0 && newCol < this.size) {
+                        this.grid[newRow][newCol] = !this.grid[newRow][newCol];
+                    }
+                }
+                
+                if (countMove) {
+                    this.updateGrid();
+                    this.updateUI();
+                }
+            }
+            
+            updateGrid() {
+                const lights = document.querySelectorAll('.light');
+                lights.forEach((light, index) => {
+                    const row = Math.floor(index / this.size);
+                    const col = index % this.size;
+                    
+                    if (this.grid[row][col]) {
+                        light.className = 'light on';
+                    } else {
+                        light.className = 'light off';
+                    }
+                });
+            }
+            
+            checkWin() {
+                const allOff = this.grid.every(row => row.every(cell => !cell));
+                
+                if (allOff) {
+                    this.handleWin();
+                }
+            }
+            
+            handleWin() {
+                // Actualizar estadísticas
+                this.gameData.completedLevels.add(this.currentLevel);
+                
+                if (!this.gameData.bestScores[this.currentLevel] || 
+                    this.moves < this.gameData.bestScores[this.currentLevel]) {
+                    this.gameData.bestScores[this.currentLevel] = this.moves;
+                }
+                
+                // Desbloquear siguiente nivel
+                if (this.currentLevel < this.maxLevel) {
+                    this.gameData.unlockedLevels = Math.max(
+                        this.gameData.unlockedLevels, 
+                        this.currentLevel + 1
+                    );
+                }
+                
+                this.saveGameData();
+                this.showSuccessAnimation();
+                this.generateLevelSelector(); // Actualizar selector de niveles
+                
+                // Auto-avanzar al siguiente nivel después de 2 segundos
+                setTimeout(() => {
+                    if (this.currentLevel < this.maxLevel && 
+                        this.currentLevel < this.gameData.unlockedLevels) {
+                        this.loadLevel(this.currentLevel + 1);
+                    }
+                }, 2000);
+            }
+            
+            showSuccessAnimation() {
+                const animation = document.getElementById('successAnimation');
+                const message = document.getElementById('successMessage');
+                
+                let congratsMessage = `¡Resuelto en ${this.moves} movimientos!`;
+                
+                if (this.gameData.bestScores[this.currentLevel] === this.moves) {
+                    congratsMessage += ' ¡NUEVO RÉCORD!';
+                }
+                
+                message.textContent = congratsMessage;
+                animation.style.display = 'flex';
+                
+                setTimeout(() => {
+                    animation.style.display = 'none';
+                }, 2000);
+            }
+            
+            updateUI() {
+                document.getElementById('levelText').textContent = 
+                    `Nivel ${this.currentLevel} (${this.size}×${this.size})`;
+                
+                document.getElementById('movesCounter').textContent = 
+                    `Movimientos: ${this.moves}`;
+                
+                const bestScore = this.gameData.bestScores[this.currentLevel];
+                document.getElementById('bestScore').textContent = 
+                    bestScore ? `Mejor: ${bestScore}` : 'Mejor: --';
+            }
+            
+            generateLevelSelector() {
+                const levelGrid = document.getElementById('levelGrid');
+                levelGrid.innerHTML = '';
+                
+                for (let i = 1; i <= this.maxLevel; i++) {
+                    const btn = document.createElement('button');
+                    btn.className = 'level-btn';
+                    btn.textContent = i;
+                    
+                    if (i <= this.gameData.unlockedLevels) {
+                        if (this.gameData.completedLevels.has(i)) {
+                            btn.classList.add('completed');
+                        } else if (i === this.currentLevel) {
+                            btn.classList.add('current');
+                        } else {
+                            btn.classList.add('unlocked');
+                        }
+                        
+                        btn.addEventListener('click', () => {
+                            this.loadLevel(i);
+                            this.toggleLevelSelector();
+                        });
+                    } else {
+                        btn.classList.add('locked');
+                    }
+                    
+                    levelGrid.appendChild(btn);
+                }
+            }
+            
+            loadLevel(level) {
+                this.currentLevel = level;
+                this.initializeGame();
+            }
+            
+            resetLevel() {
+                this.moves = 0;
+                this.generatePuzzle();
+            }
+            
+            newPuzzle() {
+                this.generatePuzzle();
+            }
+        }
+        
+        // Funciones globales
+        let game;
+        
+        function initGame() {
+            game = new LightsOutGame();
+        }
+        
+        function resetLevel() {
+            game.resetLevel();
+        }
+        
+        function newPuzzle() {
+            game.newPuzzle();
+        }
+        
+        function toggleLevelSelector() {
+            const selector = document.getElementById('levelSelector');
+            selector.classList.toggle('active');
+        }
+        
+        function showConfirm() {
+            document.getElementById('confirmModal').classList.add('show');
+        }
+        
+        function hideConfirm() {
+            document.getElementById('confirmModal').classList.remove('show');
+        }
+        
+        function confirmGoBack() {
+            window.location.href = '../index.html';
+        }
+        
+        function confirmBack() {
+            if (game.moves > 0 && !game.gameData.completedLevels.has(game.currentLevel)) {
+                showConfirm();
+            } else {
+                window.location.href = '../index.html';
+            }
+        }
+        
+        function toggleSection(sectionName) {
+            game.toggleSection(sectionName);
+        }
+        
+        // Hacer las funciones globales accesibles
+        window.resetLevel = resetLevel;
+        window.newPuzzle = newPuzzle;
+        window.toggleLevelSelector = toggleLevelSelector;
+        window.confirmBack = confirmBack;
+        
+        // Inicializar juego cuando la página carga
+        document.addEventListener('DOMContentLoaded', initGame);
+    </script>
+</body>
+</html>

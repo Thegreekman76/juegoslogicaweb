@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏛️ Torres de Hanoi - Logic Game</title>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0f4c75, #3282b8, #0f4c75, #bb8fce);
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .title {
+            font-size: 32px;
+            color: #48CAE4;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(72, 202, 228, 0.6);
+        }
+        
+        .subtitle {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 15px;
+        }
+        
+        .game-info {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .info-item {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 10px;
+        }
+        
+        .info-label {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 5px;
+        }
+        
+        .info-value {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .level-info .info-value {
+            color: #48CAE4;
+        }
+        
+        .moves-info .info-value {
+            color: #90E0EF;
+        }
+        
+        .optimal-info .info-value {
+            color: #FFD60A;
+        }
+        
+        .time-info .info-value {
+            color: #06FFA5;
+        }
+        
+        .level-selector {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .level-btn {
+            width: 45px;
+            height: 35px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        
+        .level-btn.active {
+            background: linear-gradient(45deg, #48CAE4, #90E0EF);
+            color: #0f4c75;
+            box-shadow: 0 4px 15px rgba(72, 202, 228, 0.4);
+        }
+        
+        .level-btn.completed {
+            background: linear-gradient(45deg, #06FFA5, #4AFF4A);
+            color: #0f4c75;
+        }
+        
+        .level-btn:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .instructions {
+            background: rgba(6, 255, 165, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-left: 4px solid #06FFA5;
+        }
+        
+        .instructions h3 {
+            color: #06FFA5;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+        
+        .instructions p {
+            font-size: 14px;
+            line-height: 1.4;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .game-board {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px 20px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .towers-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            height: 300px;
+            margin: 0 auto;
+            width: 100%;
+            max-width: 600px;
+            position: relative;
+        }
+        
+        .tower {
+            display: flex;
+            flex-direction: column-reverse;
+            align-items: center;
+            height: 100%;
+            width: 180px;
+            position: relative;
+        }
+        
+        .tower-base {
+            width: 160px;
+            height: 20px;
+            background: linear-gradient(45deg, #8B4513, #D2691E);
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 1;
+        }
+        
+        .tower-pole {
+            width: 8px;
+            height: 260px;
+            background: linear-gradient(135deg, #2C3E50, #34495E);
+            border-radius: 4px;
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+        
+        .tower-label {
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #48CAE4;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .disk {
+            height: 25px;
+            border-radius: 12px;
+            margin: 2px 0;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            z-index: 10;
+        }
+        
+        .disk::before {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            right: 2px;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+        }
+        
+        .disk:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+        }
+        
+        .disk.dragging {
+            transform: scale(1.1);
+            z-index: 1000;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        
+        .disk.invalid-move {
+            animation: shake 0.5s ease-in-out;
+            border-color: #FF6B6B;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        
+        /* Colores de discos - gradientes vibrantes */
+        .disk-1 { 
+            width: 60px; 
+            background: linear-gradient(45deg, #FF6B6B, #FF8E53);
+        }
+        
+        .disk-2 { 
+            width: 80px; 
+            background: linear-gradient(45deg, #4ECDC4, #44A08D);
+        }
+        
+        .disk-3 { 
+            width: 100px; 
+            background: linear-gradient(45deg, #45B7D1, #96CEB4);
+        }
+        
+        .disk-4 { 
+            width: 120px; 
+            background: linear-gradient(45deg, #F093FB, #F5576C);
+        }
+        
+        .disk-5 { 
+            width: 140px; 
+            background: linear-gradient(45deg, #4FACFE, #00F2FE);
+        }
+        
+        .disk-6 { 
+            width: 160px; 
+            background: linear-gradient(45deg, #43E97B, #38F9D7);
+        }
+        
+        .disk-7 { 
+            width: 180px; 
+            background: linear-gradient(45deg, #FA709A, #FEE140);
+        }
+        
+        .disk-8 { 
+            width: 200px; 
+            background: linear-gradient(45deg, #A8EDEA, #FED6E3);
+        }
+        
+        .tower.drop-zone {
+            background: rgba(72, 202, 228, 0.2);
+            border-radius: 10px;
+            border: 2px dashed #48CAE4;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            flex: 1;
+            min-width: 120px;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(45deg, #48CAE4, #90E0EF);
+            color: #0f4c75;
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(45deg, #6C757D, #ADB5BD);
+            color: white;
+        }
+        
+        .btn-success {
+            background: linear-gradient(45deg, #06FFA5, #4AFF4A);
+            color: #0f4c75;
+        }
+        
+        .btn-warning {
+            background: linear-gradient(45deg, #FFD60A, #FFC300);
+            color: #0f4c75;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(45deg, #FF6B6B, #FF8E53);
+            color: white;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn:disabled {
+            background: #666;
+            color: #999;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .success-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(6, 255, 165, 0.9);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            animation: fadeInOut 3s ease-in-out;
+        }
+        
+        .success-content {
+            text-align: center;
+            color: white;
+            max-width: 400px;
+            padding: 20px;
+        }
+        
+        .success-content h2 {
+            font-size: 36px;
+            margin-bottom: 15px;
+            animation: bounce 1s ease-in-out;
+        }
+        
+        .success-content p {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        
+        .success-stats {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 0; }
+            15%, 85% { opacity: 1; }
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-20px); }
+            60% { transform: translateY(-10px); }
+        }
+        
+        .auto-solve-animation .disk {
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .help-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1500;
+            padding: 20px;
+        }
+        
+        .help-modal.show {
+            display: flex;
+        }
+        
+        .help-content {
+            background: linear-gradient(145deg, #0f4c75, #3282b8);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            border: 2px solid rgba(72, 202, 228, 0.3);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        }
+        
+        .help-content h2 {
+            color: #48CAE4;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 24px;
+        }
+        
+        .help-section {
+            margin-bottom: 25px;
+        }
+        
+        .help-section h3 {
+            color: #90E0EF;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        
+        .help-section p, .help-section li {
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+        
+        .help-section ul {
+            padding-left: 20px;
+        }
+        
+        .formula {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            text-align: center;
+            font-family: monospace;
+            font-size: 18px;
+            color: #FFD60A;
+        }
+        
+        .close-help {
+            background: linear-gradient(45deg, #FF6B6B, #FF8E53);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 25px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+            margin-top: 20px;
+        }
+        
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .towers-container {
+                max-width: 100%;
+                height: 250px;
+            }
+            
+            .tower {
+                width: 120px;
+            }
+            
+            .tower-base {
+                width: 100px;
+            }
+            
+            .tower-pole {
+                height: 200px;
+            }
+            
+            .disk-1 { width: 40px; }
+            .disk-2 { width: 50px; }
+            .disk-3 { width: 60px; }
+            .disk-4 { width: 70px; }
+            .disk-5 { width: 80px; }
+            .disk-6 { width: 90px; }
+            .disk-7 { width: 100px; }
+            .disk-8 { width: 110px; }
+            
+            .controls {
+                flex-direction: column;
+            }
+            
+            .btn {
+                min-width: auto;
+            }
+            
+            .info-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .title {
+                font-size: 24px;
+            }
+            
+            .level-selector {
+                gap: 5px;
+            }
+            
+            .level-btn {
+                width: 35px;
+                height: 30px;
+                font-size: 12px;
+            }
+            
+            .towers-container {
+                height: 200px;
+            }
+            
+            .tower-pole {
+                height: 150px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">🏛️ TORRES DE HANOI</h1>
+            <p class="subtitle">El rompecabezas matemático clásico</p>
+        </div>
+        
+        <div class="instructions">
+            <h3>🎯 Objetivo:</h3>
+            <p>Mueve todos los discos de la torre izquierda a la derecha. <strong>Regla:</strong> Solo puedes colocar un disco más pequeño sobre uno más grande.</p>
+        </div>
+        
+        <div class="game-info">
+            <div class="info-grid">
+                <div class="info-item level-info">
+                    <div class="info-label">Nivel</div>
+                    <div class="info-value" id="levelDisplay">3 discos</div>
+                </div>
+                <div class="info-item moves-info">
+                    <div class="info-label">Movimientos</div>
+                    <div class="info-value" id="movesDisplay">0</div>
+                </div>
+                <div class="info-item optimal-info">
+                    <div class="info-label">Óptimo</div>
+                    <div class="info-value" id="optimalDisplay">7</div>
+                </div>
+                <div class="info-item time-info">
+                    <div class="info-label">Tiempo</div>
+                    <div class="info-value" id="timeDisplay">00:00</div>
+                </div>
+            </div>
+            
+            <div class="level-selector" id="levelSelector">
+                <!-- Se genera dinámicamente -->
+            </div>
+        </div>
+        
+        <div class="game-board">
+            <div class="towers-container" id="towersContainer">
+                <div class="tower" data-tower="0">
+                    <div class="tower-pole"></div>
+                    <div class="tower-base"></div>
+                    <div class="tower-label">Origen</div>
+                </div>
+                <div class="tower" data-tower="1">
+                    <div class="tower-pole"></div>
+                    <div class="tower-base"></div>
+                    <div class="tower-label">Auxiliar</div>
+                </div>
+                <div class="tower" data-tower="2">
+                    <div class="tower-pole"></div>
+                    <div class="tower-base"></div>
+                    <div class="tower-label">Destino</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button class="btn btn-primary" onclick="resetGame()">🔄 Reiniciar</button>
+            <button class="btn btn-success" onclick="showHelp()">❓ Ayuda</button>
+            <button class="btn btn-warning" onclick="autoSolve()" id="autoSolveBtn">🤖 Auto-resolver</button>
+            <button class="btn btn-danger" onclick="confirmBack()">🏠 Menú Principal</button>
+        </div>
+    </div>
+    
+    <div class="success-animation" id="successAnimation">
+        <div class="success-content">
+            <h2>🎉 ¡PERFECTO!</h2>
+            <p id="successMessage">¡Has resuelto las Torres de Hanoi!</p>
+            <div class="success-stats" id="successStats">
+                <!-- Se llena dinámicamente -->
+            </div>
+        </div>
+    </div>
+    
+    <div class="help-modal" id="helpModal">
+        <div class="help-content">
+            <h2>🏛️ Guía de las Torres de Hanoi</h2>
+            
+            <div class="help-section">
+                <h3>📜 La Leyenda</h3>
+                <p>Según la leyenda, en un templo de Hanoi hay 3 torres con 64 discos de oro. Los monjes deben mover todos los discos de una torre a otra siguiendo las reglas sagradas. Cuando terminen, el mundo llegará a su fin.</p>
+            </div>
+            
+            <div class="help-section">
+                <h3>⚖️ Reglas del Juego</h3>
+                <ul>
+                    <li>Solo puedes mover <strong>un disco</strong> a la vez</li>
+                    <li>Solo puedes tomar el disco <strong>superior</strong> de cada torre</li>
+                    <li><strong>NUNCA</strong> puedes colocar un disco más grande sobre uno más pequeño</li>
+                    <li>Objetivo: Mover todos los discos de la torre izquierda a la derecha</li>
+                </ul>
+            </div>
+            
+            <div class="help-section">
+                <h3>🧮 Matemáticas</h3>
+                <p>El número mínimo de movimientos para resolver n discos es:</p>
+                <div class="formula">2ⁿ - 1</div>
+                <p>Ejemplos:</p>
+                <ul>
+                    <li>3 discos = 2³ - 1 = <strong>7 movimientos</strong></li>
+                    <li>4 discos = 2⁴ - 1 = <strong>15 movimientos</strong></li>
+                    <li>5 discos = 2⁵ - 1 = <strong>31 movimientos</strong></li>
+                    <li>64 discos = 2⁶⁴ - 1 = <strong>18,446,744,073,709,551,615 movimientos</strong></li>
+                </ul>
+            </div>
+            
+            <div class="help-section">
+                <h3>🎯 Estrategia</h3>
+                <p><strong>Regla de oro:</strong> Para resolver n discos:</p>
+                <ul>
+                    <li>Mueve los primeros n-1 discos a la torre auxiliar</li>
+                    <li>Mueve el disco más grande al destino</li>
+                    <li>Mueve los n-1 discos desde la auxiliar al destino</li>
+                </ul>
+                <p>¡Es un algoritmo recursivo perfecto!</p>
+            </div>
+            
+            <div class="help-section">
+                <h3>🎮 Controles</h3>
+                <p><strong>Escritorio:</strong> Haz clic y arrastra los discos</p>
+                <p><strong>Móvil:</strong> Toca un disco para seleccionarlo, luego toca la torre destino</p>
+            </div>
+            
+            <button class="close-help" onclick="hideHelp()">✅ ¡Entendido!</button>
+        </div>
+    </div>
+
+    <script>
+        class HanoiGame {
+            constructor() {
+                this.currentLevel = 3; // Número de discos
+                this.maxLevel = 8;
+                this.towers = [[], [], []]; // [origen, auxiliar, destino]
+                this.moves = 0;
+                this.startTime = null;
+                this.gameWon = false;
+                this.gameStarted = false;
+                this.selectedDisk = null;
+                this.selectedTower = null;
+                this.autoSolving = false;
+                this.gameData = this.loadGameData();
+                
+                this.initializeGame();
+                this.setupEventListeners();
+                this.generateLevelSelector();
+                this.updateTimer();
+            }
+            
+            loadGameData() {
+                const saved = localStorage.getItem('hanoi-progress');
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    if (Array.isArray(data.completedLevels)) {
+                        data.completedLevels = new Set(data.completedLevels);
+                    }
+                    return data;
+                }
+                return {
+                    completedLevels: new Set(),
+                    bestTimes: {},
+                    bestMoves: {}
+                };
+            }
+            
+            saveGameData() {
+                const dataToSave = {
+                    completedLevels: Array.from(this.gameData.completedLevels),
+                    bestTimes: this.gameData.bestTimes,
+                    bestMoves: this.gameData.bestMoves
+                };
+                localStorage.setItem('hanoi-progress', JSON.stringify(dataToSave));
+            }
+            
+            initializeGame() {
+                this.towers = [[], [], []];
+                this.moves = 0;
+                this.gameWon = false;
+                this.gameStarted = false;
+                this.startTime = null;
+                this.selectedDisk = null;
+                this.selectedTower = null;
+                
+                // Colocar discos en la primera torre (del más grande al más pequeño)
+                for (let i = this.currentLevel; i >= 1; i--) {
+                    this.towers[0].push(i);
+                }
+                
+                this.renderTowers();
+                this.updateUI();
+            }
+            
+            generateLevelSelector() {
+                const selector = document.getElementById('levelSelector');
+                selector.innerHTML = '';
+                
+                for (let i = 3; i <= this.maxLevel; i++) {
+                    const btn = document.createElement('button');
+                    btn.className = 'level-btn';
+                    btn.textContent = i;
+                    
+                    if (i === this.currentLevel) {
+                        btn.classList.add('active');
+                    }
+                    
+                    if (this.gameData.completedLevels.has(i)) {
+                        btn.classList.add('completed');
+                    }
+                    
+                    btn.addEventListener('click', () => {
+                        if (!this.autoSolving) {
+                            this.currentLevel = i;
+                            this.initializeGame();
+                            this.generateLevelSelector();
+                        }
+                    });
+                    
+                    selector.appendChild(btn);
+                }
+            }
+            
+            renderTowers() {
+                const towers = document.querySelectorAll('.tower');
+                
+                towers.forEach((tower, towerIndex) => {
+                    // Limpiar discos existentes
+                    tower.querySelectorAll('.disk').forEach(disk => disk.remove());
+                    
+                    // Agregar discos de la torre
+                    this.towers[towerIndex].forEach((diskSize, diskIndex) => {
+                        const disk = document.createElement('div');
+                        disk.className = `disk disk-${diskSize}`;
+                        disk.dataset.size = diskSize;
+                        disk.dataset.tower = towerIndex;
+                        disk.dataset.index = diskIndex;
+                        
+                        // Solo el disco superior es clickeable
+                        if (diskIndex === this.towers[towerIndex].length - 1) {
+                            disk.style.cursor = 'pointer';
+                        } else {
+                            disk.style.cursor = 'default';
+                            disk.style.opacity = '0.8';
+                        }
+                        
+                        tower.appendChild(disk);
+                    });
+                });
+            }
+            
+            setupEventListeners() {
+                const container = document.getElementById('towersContainer');
+                
+                // Eventos de mouse para drag & drop (escritorio)
+                container.addEventListener('mousedown', this.handleMouseDown.bind(this));
+                document.addEventListener('mousemove', this.handleMouseMove.bind(this));
+                document.addEventListener('mouseup', this.handleMouseUp.bind(this));
+                
+                // Eventos táctiles para móvil
+                container.addEventListener('touchstart', this.handleTouchStart.bind(this));
+                container.addEventListener('touchmove', this.handleTouchMove.bind(this));
+                container.addEventListener('touchend', this.handleTouchEnd.bind(this));
+                
+                // Click simple para móvil
+                container.addEventListener('click', this.handleClick.bind(this));
+                
+                // Prevenir comportamiento por defecto
+                container.addEventListener('dragstart', e => e.preventDefault());
+                
+                // Cerrar modal de ayuda
+                document.getElementById('helpModal').addEventListener('click', (e) => {
+                    if (e.target === e.currentTarget) {
+                        hideHelp();
+                    }
+                });
+            }
+            
+            handleMouseDown(e) {
+                if (this.autoSolving || this.gameWon) return;
+                
+                const disk = e.target.closest('.disk');
+                if (!disk) return;
+                
+                const towerIndex = parseInt(disk.dataset.tower);
+                const diskIndex = parseInt(disk.dataset.index);
+                
+                // Solo permitir tomar el disco superior
+                if (diskIndex !== this.towers[towerIndex].length - 1) return;
+                
+                this.selectedDisk = {
+                    element: disk,
+                    size: parseInt(disk.dataset.size),
+                    towerIndex: towerIndex,
+                    originalPosition: { x: e.clientX, y: e.clientY }
+                };
+                
+                disk.classList.add('dragging');
+                this.startGameIfNeeded();
+                
+                e.preventDefault();
+            }
+            
+            handleMouseMove(e) {
+                if (!this.selectedDisk) return;
+                
+                const disk = this.selectedDisk.element;
+                const rect = disk.getBoundingClientRect();
+                
+                disk.style.position = 'fixed';
+                disk.style.left = (e.clientX - rect.width / 2) + 'px';
+                disk.style.top = (e.clientY - rect.height / 2) + 'px';
+                disk.style.zIndex = '1000';
+                
+                // Highlight de torres válidas
+                this.highlightValidTowers();
+            }
+            
+            handleMouseUp(e) {
+                if (!this.selectedDisk) return;
+                
+                const targetTower = e.target.closest('.tower');
+                let targetTowerIndex = null;
+                
+                if (targetTower) {
+                    targetTowerIndex = parseInt(targetTower.dataset.tower);
+                }
+                
+                this.completeDiskMove(targetTowerIndex);
+            }
+            
+            handleTouchStart(e) {
+                e.preventDefault();
+                const touch = e.touches[0];
+                const fakeEvent = { 
+                    target: e.target, 
+                    clientX: touch.clientX, 
+                    clientY: touch.clientY,
+                    preventDefault: () => {}
+                };
+                this.handleMouseDown(fakeEvent);
+            }
+            
+            handleTouchMove(e) {
+                e.preventDefault();
+                if (!this.selectedDisk) return;
+                
+                const touch = e.touches[0];
+                const fakeEvent = { 
+                    clientX: touch.clientX, 
+                    clientY: touch.clientY 
+                };
+                this.handleMouseMove(fakeEvent);
+            }
+            
+            handleTouchEnd(e) {
+                e.preventDefault();
+                if (!this.selectedDisk) return;
+                
+                const touch = e.changedTouches[0];
+                const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
+                const fakeEvent = { 
+                    target: elementBelow 
+                };
+                this.handleMouseUp(fakeEvent);
+            }
+            
+            handleClick(e) {
+                if (this.autoSolving || this.gameWon) return;
+                if (this.selectedDisk) return; // Ya estamos en modo drag
+                
+                const disk = e.target.closest('.disk');
+                const tower = e.target.closest('.tower');
+                
+                if (disk && !this.selectedTower) {
+                    // Seleccionar disco
+                    const towerIndex = parseInt(disk.dataset.tower);
+                    const diskIndex = parseInt(disk.dataset.index);
+                    
+                    if (diskIndex === this.towers[towerIndex].length - 1) {
+                        this.selectedTower = towerIndex;
+                        disk.style.transform = 'translateY(-10px) scale(1.1)';
+                        this.startGameIfNeeded();
+                    }
+                } else if (tower && this.selectedTower !== null) {
+                    // Mover a torre
+                    const targetTowerIndex = parseInt(tower.dataset.tower);
+                    this.moveDisksimple(this.selectedTower, targetTowerIndex);
+                    
+                    // Limpiar selección
+                    this.clearSelection();
+                }
+            }
+            
+            moveDisksimple(fromTower, toTower) {
+                if (fromTower === toTower) return;
+                
+                const diskSize = this.towers[fromTower][this.towers[fromTower].length - 1];
+                const topDiskInTarget = this.towers[toTower][this.towers[toTower].length - 1];
+                
+                // Verificar si el movimiento es válido
+                if (topDiskInTarget && diskSize > topDiskInTarget) {
+                    this.showInvalidMove(fromTower);
+                    return;
+                }
+                
+                // Realizar movimiento
+                const disk = this.towers[fromTower].pop();
+                this.towers[toTower].push(disk);
+                this.moves++;
+                
+                this.renderTowers();
+                this.updateUI();
+                this.checkWin();
+            }
+            
+            clearSelection() {
+                if (this.selectedTower !== null) {
+                    const towers = document.querySelectorAll('.tower');
+                    towers[this.selectedTower].querySelectorAll('.disk').forEach(disk => {
+                        disk.style.transform = '';
+                    });
+                    this.selectedTower = null;
+                }
+            }
+            
+            completeDiskMove(targetTowerIndex) {
+                const disk = this.selectedDisk.element;
+                
+                // Resetear estilos
+                disk.style.position = '';
+                disk.style.left = '';
+                disk.style.top = '';
+                disk.style.zIndex = '';
+                disk.classList.remove('dragging');
+                
+                // Limpiar highlights
+                document.querySelectorAll('.tower').forEach(tower => {
+                    tower.classList.remove('drop-zone');
+                });
+                
+                if (targetTowerIndex !== null && targetTowerIndex !== this.selectedDisk.towerIndex) {
+                    this.moveDisksimple(this.selectedDisk.towerIndex, targetTowerIndex);
+                }
+                
+                this.selectedDisk = null;
+            }
+            
+            highlightValidTowers() {
+                document.querySelectorAll('.tower').forEach((tower, index) => {
+                    tower.classList.remove('drop-zone');
+                    
+                    if (index !== this.selectedDisk.towerIndex) {
+                        const topDisk = this.towers[index][this.towers[index].length - 1];
+                        if (!topDisk || this.selectedDisk.size < topDisk) {
+                            tower.classList.add('drop-zone');
+                        }
+                    }
+                });
+            }
+            
+            showInvalidMove(towerIndex) {
+                const tower = document.querySelectorAll('.tower')[towerIndex];
+                const disk = tower.querySelector('.disk:last-child');
+                if (disk) {
+                    disk.classList.add('invalid-move');
+                    setTimeout(() => {
+                        disk.classList.remove('invalid-move');
+                    }, 500);
+                }
+            }
+            
+            startGameIfNeeded() {
+                if (!this.gameStarted) {
+                    this.gameStarted = true;
+                    this.startTime = Date.now();
+                }
+            }
+            
+            checkWin() {
+                if (this.towers[2].length === this.currentLevel) {
+                    this.gameWon = true;
+                    this.gameStarted = false;
+                    
+                    // Guardar estadísticas
+                    this.gameData.completedLevels.add(this.currentLevel);
+                    
+                    const timeElapsed = this.startTime ? Date.now() - this.startTime : 0;
+                    const timeKey = `level_${this.currentLevel}`;
+                    const movesKey = `level_${this.currentLevel}`;
+                    
+                    if (!this.gameData.bestTimes[timeKey] || timeElapsed < this.gameData.bestTimes[timeKey]) {
+                        this.gameData.bestTimes[timeKey] = timeElapsed;
+                    }
+                    
+                    if (!this.gameData.bestMoves[movesKey] || this.moves < this.gameData.bestMoves[movesKey]) {
+                        this.gameData.bestMoves[movesKey] = this.moves;
+                    }
+                    
+                    this.saveGameData();
+                    this.generateLevelSelector();
+                    this.showSuccessAnimation();
+                }
+            }
+            
+            showSuccessAnimation() {
+                const animation = document.getElementById('successAnimation');
+                const message = document.getElementById('successMessage');
+                const stats = document.getElementById('successStats');
+                
+                const timeElapsed = this.startTime ? Date.now() - this.startTime : 0;
+                const optimal = Math.pow(2, this.currentLevel) - 1;
+                const efficiency = Math.round((optimal / this.moves) * 100);
+                
+                message.textContent = `¡Has resuelto las Torres de ${this.currentLevel} discos!`;
+                
+                stats.innerHTML = `
+                    <p><strong>Movimientos:</strong> ${this.moves} (óptimo: ${optimal})</p>
+                    <p><strong>Tiempo:</strong> ${this.formatTime(timeElapsed)}</p>
+                    <p><strong>Eficiencia:</strong> ${efficiency}%</p>
+                    ${this.moves === optimal ? '<p style="color: #FFD60A;">🏆 ¡SOLUCIÓN PERFECTA!</p>' : ''}
+                `;
+                
+                animation.style.display = 'flex';
+                
+                setTimeout(() => {
+                    animation.style.display = 'none';
+                }, 3000);
+            }
+            
+            updateUI() {
+                document.getElementById('levelDisplay').textContent = `${this.currentLevel} discos`;
+                document.getElementById('movesDisplay').textContent = this.moves;
+                document.getElementById('optimalDisplay').textContent = Math.pow(2, this.currentLevel) - 1;
+                
+                // Actualizar botón de auto-resolver
+                const autoBtn = document.getElementById('autoSolveBtn');
+                if (this.gameWon) {
+                    autoBtn.textContent = '✅ Completado';
+                    autoBtn.disabled = true;
+                } else {
+                    autoBtn.textContent = '🤖 Auto-resolver';
+                    autoBtn.disabled = this.autoSolving;
+                }
+            }
+            
+            updateTimer() {
+                if (this.gameStarted && !this.gameWon && this.startTime) {
+                    const elapsed = Date.now() - this.startTime;
+                    document.getElementById('timeDisplay').textContent = this.formatTime(elapsed);
+                }
+                
+                requestAnimationFrame(() => this.updateTimer());
+            }
+            
+            formatTime(ms) {
+                const seconds = Math.floor(ms / 1000);
+                const minutes = Math.floor(seconds / 60);
+                const remainingSeconds = seconds % 60;
+                return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+            }
+            
+            async autoSolve() {
+                if (this.autoSolving || this.gameWon) return;
+                
+                this.autoSolving = true;
+                this.startGameIfNeeded();
+                document.body.classList.add('auto-solve-animation');
+                
+                const moves = this.calculateOptimalSolution(this.currentLevel, 0, 2, 1);
+                
+                for (const move of moves) {
+                    await this.animateMove(move.from, move.to);
+                    await new Promise(resolve => setTimeout(resolve, 600));
+                }
+                
+                document.body.classList.remove('auto-solve-animation');
+                this.autoSolving = false;
+                this.updateUI();
+            }
+            
+            calculateOptimalSolution(n, source, destination, auxiliary) {
+                if (n === 1) {
+                    return [{ from: source, to: destination }];
+                }
+                
+                const moves = [];
+                
+                // Mover n-1 discos de source a auxiliary
+                moves.push(...this.calculateOptimalSolution(n - 1, source, auxiliary, destination));
+                
+                // Mover el disco más grande de source a destination
+                moves.push({ from: source, to: destination });
+                
+                // Mover n-1 discos de auxiliary a destination
+                moves.push(...this.calculateOptimalSolution(n - 1, auxiliary, destination, source));
+                
+                return moves;
+            }
+            
+            async animateMove(fromTower, toTower) {
+                const disk = this.towers[fromTower].pop();
+                this.towers[toTower].push(disk);
+                this.moves++;
+                
+                this.renderTowers();
+                this.updateUI();
+                this.checkWin();
+            }
+            
+            resetGame() {
+                this.clearSelection();
+                if (this.autoSolving) return;
+                this.initializeGame();
+            }
+        }
+        
+        // Funciones globales
+        let game;
+        
+        function initGame() {
+            game = new HanoiGame();
+        }
+        
+        function resetGame() {
+            game.resetGame();
+        }
+        
+        function autoSolve() {
+            game.autoSolve();
+        }
+        
+        function showHelp() {
+            document.getElementById('helpModal').classList.add('show');
+        }
+        
+        function hideHelp() {
+            document.getElementById('helpModal').classList.remove('show');
+        }
+        
+        function confirmBack() {
+            if (game.gameStarted && !game.gameWon) {
+                if (confirm('¿Seguro que quieres volver al menú? Se perderá el progreso actual.')) {
+                    window.location.href = '../index.html';
+                }
+            } else {
+                window.location.href = '../index.html';
+            }
+        }
+        
+        // Inicializar cuando la página carga
+        document.addEventListener('DOMContentLoaded', initGame);
+    </script>
+</body>
+</html>

@@ -1,0 +1,1146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎲 Nim - Logic Game VS PC</title>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .title {
+            font-size: 32px;
+            color: #FFD700;
+            margin-bottom: 10px;
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+        }
+        
+        .subtitle {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 15px;
+        }
+        
+        .game-info {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .score-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .score-item {
+            text-align: center;
+        }
+        
+        .score-label {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 5px;
+        }
+        
+        .score-value {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .player-score {
+            color: #64B5F6;
+        }
+        
+        .pc-score {
+            color: #FF6B6B;
+        }
+        
+        .current-turn {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .turn-player {
+            background: linear-gradient(45deg, #4CAF50, #66BB6A);
+            box-shadow: 0 0 20px rgba(76, 175, 80, 0.4);
+        }
+        
+        .turn-pc {
+            background: linear-gradient(45deg, #FF6B6B, #FF8A80);
+            box-shadow: 0 0 20px rgba(255, 107, 107, 0.4);
+        }
+        
+        .difficulty-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .difficulty-btn {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+        }
+        
+        .difficulty-btn.active {
+            background: linear-gradient(45deg, #FFD700, #FFA726);
+            color: #333;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+        }
+        
+        .difficulty-btn:not(.active) {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        
+        .difficulty-btn:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .game-board {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .pile {
+            margin-bottom: 25px;
+            animation: fadeInUp 0.5s ease;
+        }
+        
+        .pile-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .pile-label {
+            font-size: 16px;
+            font-weight: bold;
+            color: #FFD700;
+        }
+        
+        .pile-count {
+            background: rgba(255, 215, 0, 0.2);
+            color: #FFD700;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-weight: bold;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+        }
+        
+        .pile-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            min-height: 50px;
+            align-items: center;
+        }
+        
+        .stick {
+            width: 40px;
+            height: 6px;
+            background: linear-gradient(45deg, #8B4513, #A0522D);
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .stick::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, #D2691E, #CD853F);
+            border-radius: 3px;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        
+        .stick:hover::before {
+            opacity: 0.7;
+        }
+        
+        .stick.selectable {
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+            animation: pulse 1.5s infinite;
+        }
+        
+        .stick.selected {
+            background: linear-gradient(45deg, #FFD700, #FFA726);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+            transform: scale(1.1);
+        }
+        
+        .stick.removing {
+            animation: removeStick 0.6s ease forwards;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 15px rgba(255, 215, 0, 0.6); }
+            50% { box-shadow: 0 0 25px rgba(255, 215, 0, 0.9); }
+        }
+        
+        @keyframes removeStick {
+            0% { transform: scale(1.1) rotate(0deg); opacity: 1; }
+            50% { transform: scale(1.3) rotate(180deg); opacity: 0.5; }
+            100% { transform: scale(0) rotate(360deg); opacity: 0; }
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .action-panel {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .selection-info {
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 16px;
+            min-height: 20px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            flex: 1;
+            min-width: 85px;
+            padding: 12px 8px;
+            border: none;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(45deg, #4CAF50, #66BB6A);
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(45deg, #607D8B, #78909C);
+            color: white;
+        }
+        
+        .btn-warning {
+            background: linear-gradient(45deg, #FFD60A, #FFC300);
+            color: #333;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(45deg, #FF6B6B, #FF8A80);
+            color: white;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn:disabled {
+            background: #666;
+            color: #999;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .game-over {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .game-over.show {
+            display: flex;
+        }
+        
+        .game-over-content {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 350px;
+            margin: 20px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .game-over h2 {
+            font-size: 28px;
+            margin-bottom: 15px;
+            color: #FFD700;
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+        }
+        
+        .game-over p {
+            font-size: 16px;
+            margin-bottom: 25px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        .instructions {
+            background: rgba(33, 150, 243, 0.15);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-left: 4px solid #2196F3;
+        }
+        
+        .instructions h3 {
+            color: #64B5F6;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+        
+        .instructions p {
+            font-size: 14px;
+            line-height: 1.4;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .help-button {
+            background: linear-gradient(45deg, #2196F3, #42A5F5);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 15px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            margin-top: 10px;
+            transition: all 0.2s ease;
+        }
+        
+        .help-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4);
+        }
+        
+        .help-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+        
+        .help-modal.show {
+            display: flex;
+        }
+        
+        .help-content {
+            background: linear-gradient(145deg, #667eea, #764ba2);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        }
+        
+        .help-content h2 {
+            color: #FFD700;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 24px;
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+        }
+        
+        .help-section {
+            margin-bottom: 25px;
+        }
+        
+        .help-section h3 {
+            color: #64B5F6;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        
+        .help-section p {
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+        
+        .example-board {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .example-pile {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            font-family: monospace;
+        }
+        
+        .example-label {
+            color: #FFD700;
+            width: 60px;
+            font-weight: bold;
+        }
+        
+        .example-sticks {
+            color: #FFA726;
+        }
+        
+        .highlight {
+            background: rgba(255, 193, 7, 0.3);
+            padding: 2px 4px;
+            border-radius: 4px;
+            color: #FFD700;
+            font-weight: bold;
+        }
+        
+        .strategy-tip {
+            background: rgba(76, 175, 80, 0.2);
+            border-left: 4px solid #4CAF50;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        
+        .strategy-tip h4 {
+            color: #66BB6A;
+            margin-bottom: 8px;
+        }
+        
+        .close-help {
+            background: linear-gradient(45deg, #FF6B6B, #FF8A80);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 25px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+            margin-top: 20px;
+        }
+        
+        .ai-thinking {
+            text-align: center;
+            color: #FFD700;
+            font-style: italic;
+            animation: thinking 2s infinite;
+        }
+        
+        @keyframes thinking {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+        
+        /* Responsive design */
+        @media (max-width: 480px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .stick {
+                width: 35px;
+                height: 5px;
+            }
+            
+            .game-board {
+                padding: 20px;
+            }
+            
+            .score-section {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .btn {
+                min-width: auto;
+                padding: 12px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">🎲 NIM</h1>
+            <p class="subtitle">Juego de Lógica VS PC</p>
+        </div>
+        
+        <div class="instructions">
+            <h3>🎯 Reglas Básicas:</h3>
+            <p>Quita <strong>cualquier cantidad</strong> de palitos de <strong>UNA sola pila</strong> por turno. El jugador que tome el ÚLTIMO palito PIERDE.</p>
+            <button class="help-button" onclick="showHelp()">❓ Ayuda Detallada con Ejemplos</button>
+        </div>
+        
+        <div class="game-info">
+            <div class="score-section">
+                <div class="score-item">
+                    <div class="score-label">TÚ</div>
+                    <div class="score-value player-score" id="playerScore">0</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-label">PC</div>
+                    <div class="score-value pc-score" id="pcScore">0</div>
+                </div>
+            </div>
+            
+            <div class="current-turn" id="currentTurn">
+                🎯 Tu turno - Selecciona palitos
+            </div>
+            
+            <div class="difficulty-selector">
+                <button class="difficulty-btn active" data-level="easy">Fácil</button>
+                <button class="difficulty-btn" data-level="medium">Medio</button>
+                <button class="difficulty-btn" data-level="hard">Difícil</button>
+                <button class="difficulty-btn" data-level="expert">Experto</button>
+            </div>
+        </div>
+        
+        <div class="game-board" id="gameBoard">
+            <!-- Se genera dinámicamente -->
+        </div>
+        
+        <div class="action-panel">
+            <div class="selection-info" id="selectionInfo">
+                Selecciona palitos de UNA pila
+            </div>
+            <div class="action-buttons">
+                <button class="btn btn-primary" id="confirmBtn" onclick="confirmMove()" disabled>
+                    ✅ Confirmar
+                </button>
+                <button class="btn btn-secondary" onclick="clearSelection()">
+                    🔄 Limpiar
+                </button>
+                <button class="btn btn-warning" onclick="newGame()">
+                    🎮 Nuevo
+                </button>
+                <button class="btn btn-danger" onclick="confirmBack()">
+                    🏠 Menú
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="game-over" id="gameOver">
+        <div class="game-over-content">
+            <h2 id="gameOverTitle">🎉 ¡Ganaste!</h2>
+            <p id="gameOverMessage">¡Excelente estrategia!</p>
+            <button class="btn btn-primary" onclick="newGame()">
+                🎮 Jugar de Nuevo
+            </button>
+        </div>
+    </div>
+    
+    <div class="help-modal" id="helpModal">
+        <div class="help-content">
+            <h2>📚 Guía Completa del Nim</h2>
+            
+            <div class="help-section">
+                <h3>🎯 Regla Principal</h3>
+                <p>Puedes quitar <span class="highlight">cualquier cantidad</span> de palitos (desde 1 hasta todos) de <span class="highlight">UNA sola pila</span> por turno.</p>
+                <p><strong>¡El que tome el último palito PIERDE!</strong></p>
+            </div>
+            
+            <div class="help-section">
+                <h3>📝 Ejemplo de Jugada</h3>
+                <div class="example-board">
+                    <div class="example-pile">
+                        <span class="example-label">Pila 1:</span>
+                        <span class="example-sticks">🟫🟫🟫🟫🟫🟫🟫 (7 palitos)</span>
+                    </div>
+                    <div class="example-pile">
+                        <span class="example-label">Pila 2:</span>
+                        <span class="example-sticks">🟫🟫🟫🟫🟫 (5 palitos)</span>
+                    </div>
+                    <div class="example-pile">
+                        <span class="example-label">Pila 3:</span>
+                        <span class="example-sticks">🟫🟫🟫 (3 palitos)</span>
+                    </div>
+                </div>
+                
+                <p><strong>Opciones válidas:</strong></p>
+                <p>• Quitar 1, 2, 3, 4, 5, 6 o 7 palitos de la Pila 1</p>
+                <p>• Quitar 1, 2, 3, 4 o 5 palitos de la Pila 2</p>
+                <p>• Quitar 1, 2 o 3 palitos de la Pila 3</p>
+                
+                <p><strong>❌ NO puedes:</strong> Quitar de múltiples pilas en un turno</p>
+            </div>
+            
+            <div class="help-section">
+                <h3>🧠 Estrategia Básica</h3>
+                <p><strong>Situación peligrosa:</strong> Cuando solo queda 1 palito total, ¡el siguiente jugador pierde automáticamente!</p>
+                
+                <div class="strategy-tip">
+                    <h4>💡 Consejo Clave</h4>
+                    <p>Trata de dejar a tu oponente en una posición donde todas sus jugadas lo obliguen a tomar el último palito.</p>
+                </div>
+            </div>
+            
+            <div class="help-section">
+                <h3>🔢 Estrategia Avanzada (Nim-Sum)</h3>
+                <p>Los expertos usan matemáticas: calculan el <span class="highlight">XOR</span> de todas las pilas.</p>
+                
+                <div class="example-board">
+                    <div class="example-pile">
+                        <span class="example-label">Ejemplo:</span>
+                        <span style="color: #FFF;">Pilas: 5, 3, 1</span>
+                    </div>
+                    <div class="example-pile">
+                        <span class="example-label">XOR:</span>
+                        <span style="color: #FFF;">5 ⊕ 3 ⊕ 1 = 7</span>
+                    </div>
+                </div>
+                
+                <p><strong>Regla de oro:</strong></p>
+                <p>• Si XOR = 0 → Posición perdedora</p>
+                <p>• Si XOR ≠ 0 → Existe jugada ganadora</p>
+            </div>
+            
+            <div class="help-section">
+                <h3>🎮 Niveles de Dificultad</h3>
+                <p><strong>🟢 Fácil:</strong> PC hace jugadas aleatorias</p>
+                <p><strong>🟡 Medio:</strong> PC a veces usa estrategia</p>
+                <p><strong>🔴 Difícil:</strong> PC usa matemáticas siempre</p>
+                <p><strong>⚫ Experto:</strong> PC juega perfectamente</p>
+            </div>
+            
+            <button class="close-help" onclick="hideHelp()">✅ ¡Entendido! Vamos a jugar</button>
+        </div>
+    </div>
+    
+    <!-- Modal de confirmación -->
+    <div class="help-modal" id="confirmModal">
+        <div class="help-content" style="max-width: 400px;">
+            <h2 id="confirmTitle">🏠 Volver al Menú</h2>
+            <div class="help-section">
+                <p id="confirmMessage">¿Seguro que quieres volver al menú principal? Se perderá la partida actual.</p>
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="close-help" onclick="confirmGoBack()" style="background: linear-gradient(45deg, #4CAF50, #66BB6A);">✅ Sí, Volver</button>
+                <button class="close-help" onclick="hideConfirm()" style="background: linear-gradient(45deg, #FF6B6B, #FF8A80);">❌ Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class NimGame {
+            constructor() {
+                this.piles = [7, 5, 3, 1]; // Configuración inicial clásica
+                this.currentPlayer = 'player'; // 'player' o 'pc'
+                this.selectedSticks = [];
+                this.selectedPile = -1;
+                this.difficulty = 'easy';
+                this.scores = { player: 0, pc: 0 };
+                this.gameActive = true;
+                
+                this.loadScores();
+                this.createBoard();
+                this.updateUI();
+                this.setupEventListeners();
+            }
+            
+            loadScores() {
+                const saved = localStorage.getItem('nim-scores');
+                if (saved) {
+                    this.scores = JSON.parse(saved);
+                }
+            }
+            
+            saveScores() {
+                localStorage.setItem('nim-scores', JSON.stringify(this.scores));
+            }
+            
+            setupEventListeners() {
+                // Botones de dificultad
+                document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('active'));
+                        e.target.classList.add('active');
+                        this.difficulty = e.target.dataset.level;
+                    });
+                });
+                
+                // Cerrar modal de ayuda al hacer clic fuera
+                document.getElementById('helpModal').addEventListener('click', (e) => {
+                    if (e.target === e.currentTarget) {
+                        hideHelp();
+                    }
+                });
+                
+                // Cerrar modal de confirmación al hacer clic fuera
+                document.getElementById('confirmModal').addEventListener('click', (e) => {
+                    if (e.target === e.currentTarget) {
+                        hideConfirm();
+                    }
+                });
+            }
+            
+            createBoard() {
+                const board = document.getElementById('gameBoard');
+                board.innerHTML = '';
+                
+                this.piles.forEach((count, pileIndex) => {
+                    const pileDiv = document.createElement('div');
+                    pileDiv.className = 'pile';
+                    
+                    const header = document.createElement('div');
+                    header.className = 'pile-header';
+                    header.innerHTML = `
+                        <span class="pile-label">Pila ${pileIndex + 1}</span>
+                        <span class="pile-count">${count}</span>
+                    `;
+                    
+                    const itemsDiv = document.createElement('div');
+                    itemsDiv.className = 'pile-items';
+                    
+                    for (let i = 0; i < count; i++) {
+                        const stick = document.createElement('div');
+                        stick.className = 'stick';
+                        stick.dataset.pile = pileIndex;
+                        stick.dataset.index = i;
+                        
+                        stick.addEventListener('click', () => this.selectStick(pileIndex, i));
+                        
+                        itemsDiv.appendChild(stick);
+                    }
+                    
+                    pileDiv.appendChild(header);
+                    pileDiv.appendChild(itemsDiv);
+                    board.appendChild(pileDiv);
+                });
+            }
+            
+            selectStick(pileIndex, stickIndex) {
+                if (!this.gameActive || this.currentPlayer !== 'player') return;
+                
+                // Si seleccionamos de una pila diferente, limpiar selección anterior
+                if (this.selectedPile !== -1 && this.selectedPile !== pileIndex) {
+                    this.clearSelection();
+                }
+                
+                this.selectedPile = pileIndex;
+                const stickKey = `${pileIndex}-${stickIndex}`;
+                
+                // Toggle selección - permitir seleccionar cualquier cantidad consecutiva desde el final
+                if (this.selectedSticks.includes(stickKey)) {
+                    // Deseleccionar este y todos los que están después
+                    this.selectedSticks = this.selectedSticks.filter(key => {
+                        const index = parseInt(key.split('-')[1]);
+                        return index > stickIndex;
+                    });
+                } else {
+                    // Seleccionar desde este hasta el final
+                    const currentCount = this.piles[pileIndex];
+                    for (let i = stickIndex; i < currentCount; i++) {
+                        const key = `${pileIndex}-${i}`;
+                        if (!this.selectedSticks.includes(key)) {
+                            this.selectedSticks.push(key);
+                        }
+                    }
+                }
+                
+                if (this.selectedSticks.length === 0) {
+                    this.selectedPile = -1;
+                }
+                
+                this.updateStickStyles();
+                this.updateUI();
+            }
+            
+            updateStickStyles() {
+                // Limpiar todos los estilos
+                document.querySelectorAll('.stick').forEach(stick => {
+                    stick.classList.remove('selected', 'selectable');
+                });
+                
+                if (this.currentPlayer === 'player' && this.gameActive) {
+                    // Marcar seleccionados
+                    this.selectedSticks.forEach(stickKey => {
+                        const [pileIndex, stickIndex] = stickKey.split('-').map(Number);
+                        const stick = document.querySelector(`[data-pile="${pileIndex}"][data-index="${stickIndex}"]`);
+                        if (stick) stick.classList.add('selected');
+                    });
+                    
+                    // Marcar seleccionables
+                    if (this.selectedPile === -1) {
+                        // Si no hay pila seleccionada, todos los palitos son seleccionables
+                        this.piles.forEach((count, pileIndex) => {
+                            for (let i = 0; i < count; i++) {
+                                const stick = document.querySelector(`[data-pile="${pileIndex}"][data-index="${i}"]`);
+                                if (stick) stick.classList.add('selectable');
+                            }
+                        });
+                    } else {
+                        // Si hay pila seleccionada, solo los de esa pila son seleccionables
+                        const count = this.piles[this.selectedPile];
+                        for (let i = 0; i < count; i++) {
+                            const stick = document.querySelector(`[data-pile="${this.selectedPile}"][data-index="${i}"]`);
+                            if (stick && !stick.classList.contains('selected')) {
+                                stick.classList.add('selectable');
+                            }
+                        }
+                    }
+                }
+            }
+            
+            clearSelection() {
+                this.selectedSticks = [];
+                this.selectedPile = -1;
+                this.updateStickStyles();
+                this.updateUI();
+            }
+            
+            confirmMove() {
+                if (this.selectedSticks.length === 0 || !this.gameActive) return;
+                
+                // Animar remoción
+                this.selectedSticks.forEach(stickKey => {
+                    const [pileIndex, stickIndex] = stickKey.split('-').map(Number);
+                    const stick = document.querySelector(`[data-pile="${pileIndex}"][data-index="${stickIndex}"]`);
+                    if (stick) {
+                        stick.classList.add('removing');
+                    }
+                });
+                
+                // Esperar animación y actualizar estado
+                setTimeout(() => {
+                    this.piles[this.selectedPile] -= this.selectedSticks.length;
+                    this.clearSelection();
+                    this.createBoard();
+                    
+                    if (this.checkGameOver()) {
+                        this.endGame('pc'); // El jugador que hizo el último movimiento pierde
+                    } else {
+                        this.currentPlayer = 'pc';
+                        this.updateUI();
+                        setTimeout(() => this.pcMove(), 1000);
+                    }
+                }, 600);
+            }
+            
+            pcMove() {
+                if (!this.gameActive) return;
+                
+                const move = this.calculatePCMove();
+                if (!move) return;
+                
+                // Animar movimiento de PC
+                const sticks = [];
+                for (let i = this.piles[move.pile] - 1; i >= this.piles[move.pile] - move.count; i--) {
+                    const stick = document.querySelector(`[data-pile="${move.pile}"][data-index="${i}"]`);
+                    if (stick) {
+                        stick.classList.add('removing');
+                        sticks.push(stick);
+                    }
+                }
+                
+                setTimeout(() => {
+                    this.piles[move.pile] -= move.count;
+                    this.createBoard();
+                    
+                    if (this.checkGameOver()) {
+                        this.endGame('player'); // PC hizo el último movimiento, jugador gana
+                    } else {
+                        this.currentPlayer = 'player';
+                        this.updateUI();
+                    }
+                }, 600);
+            }
+            
+            calculatePCMove() {
+                const availablePiles = this.piles.map((count, index) => ({ index, count }))
+                    .filter(pile => pile.count > 0);
+                
+                if (availablePiles.length === 0) return null;
+                
+                switch (this.difficulty) {
+                    case 'easy':
+                        return this.easyMove(availablePiles);
+                    case 'medium':
+                        return this.mediumMove(availablePiles);
+                    case 'hard':
+                    case 'expert':
+                        return this.optimalMove(availablePiles);
+                    default:
+                        return this.easyMove(availablePiles);
+                }
+            }
+            
+            easyMove(availablePiles) {
+                // Movimiento aleatorio
+                const pile = availablePiles[Math.floor(Math.random() * availablePiles.length)];
+                const maxTake = this.difficulty === 'easy' ? Math.min(pile.count, 3) : pile.count;
+                const count = Math.floor(Math.random() * maxTake) + 1;
+                
+                return { pile: pile.index, count };
+            }
+            
+            mediumMove(availablePiles) {
+                // Combina estrategia básica con algunos movimientos aleatorios
+                if (Math.random() < 0.6) {
+                    return this.optimalMove(availablePiles);
+                } else {
+                    return this.easyMove(availablePiles);
+                }
+            }
+            
+            optimalMove(availablePiles) {
+                // Estrategia óptima usando nim-sum (XOR)
+                const nimSum = this.calculateNimSum();
+                
+                if (nimSum === 0) {
+                    // Posición perdedora, hacer movimiento aleatorio
+                    return this.easyMove(availablePiles);
+                }
+                
+                // Encontrar movimiento que haga nim-sum = 0
+                for (let pile of availablePiles) {
+                    const targetSize = pile.count ^ nimSum;
+                    if (targetSize < pile.count) {
+                        const count = pile.count - targetSize;
+                        return { pile: pile.index, count };
+                    }
+                }
+                
+                // Fallback
+                return this.easyMove(availablePiles);
+            }
+            
+            calculateNimSum() {
+                return this.piles.reduce((sum, pile) => sum ^ pile, 0);
+            }
+            
+            checkGameOver() {
+                return this.piles.every(pile => pile === 0);
+            }
+            
+            endGame(winner) {
+                this.gameActive = false;
+                this.scores[winner]++;
+                this.saveScores();
+                
+                setTimeout(() => {
+                    const gameOver = document.getElementById('gameOver');
+                    const title = document.getElementById('gameOverTitle');
+                    const message = document.getElementById('gameOverMessage');
+                    
+                    if (winner === 'player') {
+                        title.textContent = '🎉 ¡Ganaste!';
+                        message.textContent = '¡Excelente estrategia matemática!';
+                    } else {
+                        title.textContent = '🤖 PC Gana';
+                        message.textContent = 'La PC te superó esta vez. ¡Inténtalo de nuevo!';
+                    }
+                    
+                    gameOver.classList.add('show');
+                    this.updateScores();
+                }, 500);
+            }
+            
+            newGame() {
+                // Configuraciones aleatorias para variedad
+                const configs = [
+                    [7, 5, 3, 1],
+                    [6, 4, 2],
+                    [5, 4, 3, 2, 1],
+                    [8, 6, 4],
+                    [9, 7, 5, 3]
+                ];
+                
+                this.piles = [...configs[Math.floor(Math.random() * configs.length)]];
+                this.currentPlayer = 'player';
+                this.selectedSticks = [];
+                this.selectedPile = -1;
+                this.gameActive = true;
+                
+                document.getElementById('gameOver').classList.remove('show');
+                this.createBoard();
+                this.updateUI();
+            }
+            
+            updateUI() {
+                // Actualizar contador de palitos en cada pila
+                document.querySelectorAll('.pile-count').forEach((element, index) => {
+                    element.textContent = this.piles[index];
+                });
+                
+                // Actualizar turno
+                const turnElement = document.getElementById('currentTurn');
+                const confirmBtn = document.getElementById('confirmBtn');
+                const selectionInfo = document.getElementById('selectionInfo');
+                
+                if (this.currentPlayer === 'player') {
+                    turnElement.textContent = '🎯 Tu turno - Haz clic en cualquier palito';
+                    turnElement.className = 'current-turn turn-player';
+                    
+                    if (this.selectedSticks.length > 0) {
+                        confirmBtn.disabled = false;
+                        const pileNum = this.selectedPile + 1;
+                        const count = this.selectedSticks.length;
+                        selectionInfo.textContent = `Quitar ${count} palito${count > 1 ? 's' : ''} de la Pila ${pileNum}`;
+                    } else {
+                        confirmBtn.disabled = true;
+                        selectionInfo.textContent = 'Haz clic en cualquier palito para seleccionar hasta el final de esa pila';
+                    }
+                } else {
+                    turnElement.textContent = '🤖 Turno de PC';
+                    turnElement.className = 'current-turn turn-pc';
+                    confirmBtn.disabled = true;
+                    selectionInfo.innerHTML = '<span class="ai-thinking">PC pensando...</span>';
+                }
+                
+                this.updateStickStyles();
+                this.updateScores();
+            }
+            
+            updateScores() {
+                document.getElementById('playerScore').textContent = this.scores.player;
+                document.getElementById('pcScore').textContent = this.scores.pc;
+            }
+        }
+        
+        // Funciones globales
+        let game;
+        
+        function initGame() {
+            game = new NimGame();
+        }
+        
+        function confirmMove() {
+            game.confirmMove();
+        }
+        
+        function clearSelection() {
+            game.clearSelection();
+        }
+        
+        function newGame() {
+            game.newGame();
+        }
+        
+        function showHelp() {
+            document.getElementById('helpModal').classList.add('show');
+        }
+        
+        function hideHelp() {
+            document.getElementById('helpModal').classList.remove('show');
+        }
+        
+        function showConfirm() {
+            document.getElementById('confirmModal').classList.add('show');
+        }
+        
+        function hideConfirm() {
+            document.getElementById('confirmModal').classList.remove('show');
+        }
+        
+        function confirmGoBack() {
+            window.location.href = '../index.html';
+        }
+        
+        function confirmBack() {
+            if (game.gameActive && game.currentPlayer === 'player') {
+                showConfirm();
+            } else {
+                window.location.href = '../index.html';
+            }
+        }
+        
+        // Inicializar cuando la página carga
+        document.addEventListener('DOMContentLoaded', initGame);
+    </script>
+</body>
+</html>
