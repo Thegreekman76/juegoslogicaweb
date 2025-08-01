@@ -249,13 +249,13 @@
             background: rgba(255, 255, 255, 0.1);
             border-radius: 20px;
             padding: 20px;
-            margin-bottom: 20px;
+            margin-bottom: 30px;
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.2);
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 400px;
+            min-height: 420px;
         }
         
         .tents-grid-container {
@@ -267,7 +267,7 @@
             display: grid;
             gap: 2px;
             background: rgba(34, 139, 34, 0.3);
-            padding: 8px;
+            padding: 8px 54px 54px 8px;
             border-radius: 10px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         }
@@ -333,28 +333,28 @@
         .row-numbers, .col-numbers {
             position: absolute;
             display: flex;
-            background: rgba(255, 255, 255, 0.9);
+            background: transparent;
             border-radius: 8px;
         }
         
         .row-numbers {
-            right: -45px;
+            right: 2px;
             top: 8px;
             flex-direction: column;
             gap: 2px;
         }
         
         .col-numbers {
-            bottom: -45px;
+            bottom: 2px;
             left: 8px;
             flex-direction: row;
             gap: 2px;
         }
         
         .number-cell {
-            width: 35px;
-            height: 35px;
-            background: rgba(34, 139, 34, 0.8);
+            width: 50px;
+            height: 50px;
+            background: rgba(34, 139, 34, 0.9);
             color: white;
             display: flex;
             align-items: center;
@@ -363,6 +363,7 @@
             font-size: 16px;
             border-radius: 4px;
             border: 2px solid #228B22;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
         }
         
         .number-cell.completed {
@@ -599,6 +600,16 @@
         @media (max-width: 768px) {
             .container {
                 padding: 10px;
+                padding-bottom: 30px;
+            }
+            
+            .game-board {
+                margin-bottom: 25px;
+                min-height: 350px;
+            }
+            
+            .tents-grid {
+                padding: 8px 44px 44px 8px;
             }
             
             .title {
@@ -612,17 +623,17 @@
             }
             
             .number-cell {
-                width: 30px;
-                height: 30px;
+                width: 40px;
+                height: 40px;
                 font-size: 14px;
             }
             
             .row-numbers {
-                right: -35px;
+                right: 2px;
             }
             
             .col-numbers {
-                bottom: -35px;
+                bottom: 2px;
             }
             
             .controls {
@@ -639,6 +650,19 @@
         }
         
         @media (max-width: 480px) {
+            .container {
+                padding-bottom: 40px;
+            }
+            
+            .game-board {
+                margin-bottom: 20px;
+                min-height: 320px;
+            }
+            
+            .tents-grid {
+                padding: 8px 39px 39px 8px;
+            }
+            
             .tents-cell {
                 width: 35px;
                 height: 35px;
@@ -646,17 +670,17 @@
             }
             
             .number-cell {
-                width: 25px;
-                height: 25px;
+                width: 35px;
+                height: 35px;
                 font-size: 12px;
             }
             
             .row-numbers {
-                right: -30px;
+                right: 2px;
             }
             
             .col-numbers {
-                bottom: -30px;
+                bottom: 2px;
             }
             
             .info-grid {
@@ -752,10 +776,11 @@
             </div>
         </div>
         
-        <div class="action-buttons">
+        <!-- Los botones de modo ya no son necesarios con el nuevo comportamiento de clic único -->
+        <!-- <div class="action-buttons">
             <button class="action-btn tent-mode active" id="tentModeBtn" onclick="setMode('tent')">⛺ Tienda</button>
             <button class="action-btn mark-mode" id="markModeBtn" onclick="setMode('mark')">❌ Marcar</button>
-        </div>
+        </div> -->
         
         <div class="game-board">
             <div class="tents-grid-container">
@@ -812,9 +837,10 @@
             <div class="help-section">
                 <h3>🎮 Controles</h3>
                 <div class="formula-box">
-                    <p><strong>Modo Tienda (⛺):</strong> Haz clic para colocar/quitar tiendas</p>
-                    <p><strong>Modo Marcar (❌):</strong> Marca espacios donde NO puede haber tiendas</p>
-                    <p><strong>Cambiar modo:</strong> Usa los botones de arriba o haz clic derecho</p>
+                    <p><strong>Un solo clic hace todo:</strong></p>
+                    <p>• <strong>1er clic:</strong> Coloca una tienda ⛺</p>
+                    <p>• <strong>2do clic:</strong> Cambia a marca ❌</p>
+                    <p>• <strong>3er clic:</strong> Limpia la celda</p>
                 </div>
             </div>
             
@@ -856,7 +882,7 @@
                 this.marks = [];
                 this.rowTargets = [];
                 this.colTargets = [];
-                this.mode = 'tent'; // 'tent' or 'mark'
+                // Ya no necesitamos modo, el comportamiento es cíclico con un solo clic
                 this.startTime = null;
                 this.gameCompleted = false;
                 this.errors = 0;
@@ -948,11 +974,10 @@
                     });
                 });
                 
-                // Click derecho para cambiar modo
+                // Click derecho deshabilitado ya que no necesitamos cambiar modos
                 document.addEventListener('contextmenu', (e) => {
                     if (e.target.classList.contains('tents-cell')) {
                         e.preventDefault();
-                        this.toggleMode();
                     }
                 });
                 
@@ -1200,24 +1225,17 @@
             cellClick(row, col) {
                 if (this.gameCompleted || this.grid[row][col] === 1) return; // No clickear árboles
                 
-                if (this.mode === 'tent') {
-                    if (this.isTent(row, col)) {
-                        // Quitar tienda
-                        this.tents = this.tents.filter(t => t.row !== row || t.col !== col);
-                    } else if (!this.isMark(row, col)) {
-                        // Colocar tienda (si no hay marca)
-                        this.tents.push({row, col});
-                        // Quitar marca si existía
-                        this.marks = this.marks.filter(m => m.row !== row || m.col !== col);
-                    }
-                } else if (this.mode === 'mark') {
-                    if (this.isMark(row, col)) {
-                        // Quitar marca
-                        this.marks = this.marks.filter(m => m.row !== row || m.col !== col);
-                    } else if (!this.isTent(row, col)) {
-                        // Colocar marca (si no hay tienda)
-                        this.marks.push({row, col});
-                    }
+                // Nuevo comportamiento de 3 estados: vacío -> tienda -> marca -> vacío
+                if (this.isTent(row, col)) {
+                    // Si hay tienda, cambiar a marca
+                    this.tents = this.tents.filter(t => t.row !== row || t.col !== col);
+                    this.marks.push({row, col});
+                } else if (this.isMark(row, col)) {
+                    // Si hay marca, limpiar celda
+                    this.marks = this.marks.filter(m => m.row !== row || m.col !== col);
+                } else {
+                    // Si está vacía, colocar tienda
+                    this.tents.push({row, col});
                 }
                 
                 this.renderGrid();
@@ -1394,17 +1412,18 @@
                 }, 3000);
             }
             
-            setMode(mode) {
-                this.mode = mode;
-                
-                // Actualizar botones
-                document.getElementById('tentModeBtn').classList.toggle('active', mode === 'tent');
-                document.getElementById('markModeBtn').classList.toggle('active', mode === 'mark');
-            }
-            
-            toggleMode() {
-                this.setMode(this.mode === 'tent' ? 'mark' : 'tent');
-            }
+            // Funciones de modo ya no necesarias con el comportamiento cíclico
+            // setMode(mode) {
+            //     this.mode = mode;
+            //     
+            //     // Actualizar botones
+            //     document.getElementById('tentModeBtn').classList.toggle('active', mode === 'tent');
+            //     document.getElementById('markModeBtn').classList.toggle('active', mode === 'mark');
+            // }
+            // 
+            // toggleMode() {
+            //     this.setMode(this.mode === 'tent' ? 'mark' : 'tent');
+            // }
             
             getHint() {
                 // Buscar un movimiento obvio
@@ -1532,9 +1551,9 @@
             if (game) game.getHint();
         }
         
-        function setMode(mode) {
-            if (game) game.setMode(mode);
-        }
+        // function setMode(mode) {
+        //     if (game) game.setMode(mode);
+        // }
         
         function showHelp() {
             const helpModal = document.getElementById('helpModal');
