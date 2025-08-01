@@ -1,0 +1,1581 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏕️ TENTS - Trees & Camping Logic</title>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #2d5016 0%, #4a7c59 25%, #68b684 50%, #87ceeb 75%, #98fb98 100%);
+            color: white;
+            min-height: 100vh;
+            user-select: none;
+            padding-bottom: 20px;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 15px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .title {
+            font-size: 32px;
+            background: linear-gradient(45deg, #228B22, #32CD32, #90EE90);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(34, 139, 34, 0.3);
+            animation: glow 3s ease-in-out infinite alternate;
+        }
+        
+        .subtitle {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 15px;
+        }
+        
+        @keyframes glow {
+            from { text-shadow: 0 0 20px rgba(34, 139, 34, 0.3); }
+            to { text-shadow: 0 0 30px rgba(34, 139, 34, 0.6); }
+        }
+        
+        /* Secciones colapsables */
+        .collapsible-section {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 15px;
+            margin-bottom: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            overflow: hidden;
+        }
+        
+        .section-header {
+            padding: 12px 15px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            background: rgba(255, 255, 255, 0.1);
+            transition: background 0.2s ease;
+        }
+        
+        .section-header:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        .section-icon {
+            font-size: 16px;
+            transition: transform 0.3s ease;
+        }
+        
+        .section-content {
+            padding: 15px;
+            display: none;
+            animation: slideDown 0.3s ease;
+        }
+        
+        .section-content.active {
+            display: block;
+        }
+        
+        .collapsible-section.collapsed .section-icon {
+            transform: rotate(-90deg);
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .game-info {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .info-item {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 10px;
+        }
+        
+        .info-label {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 5px;
+        }
+        
+        .info-value {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .level-info .info-value {
+            color: #90EE90;
+        }
+        
+        .time-info .info-value {
+            color: #98FB98;
+        }
+        
+        .errors-info .info-value {
+            color: #FFB6C1;
+        }
+        
+        .progress-info .info-value {
+            color: #87CEEB;
+        }
+        
+        .difficulty-selector {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .difficulty-btn {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            min-width: 70px;
+        }
+        
+        .difficulty-btn.active {
+            background: linear-gradient(45deg, #228B22, #32CD32);
+            color: white;
+            box-shadow: 0 4px 15px rgba(34, 139, 34, 0.4);
+        }
+        
+        .difficulty-btn:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .instructions {
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        .instructions h3 {
+            color: #90EE90;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+        
+        .instructions p {
+            font-size: 13px;
+            line-height: 1.4;
+            margin-bottom: 8px;
+        }
+        
+        .instructions ul {
+            padding-left: 20px;
+            margin: 10px 0;
+        }
+        
+        .instructions li {
+            font-size: 13px;
+            line-height: 1.4;
+            margin-bottom: 5px;
+        }
+        
+        .rule-examples {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin: 10px 0;
+        }
+        
+        .example-box {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .example-rule {
+            font-size: 14px;
+            font-weight: bold;
+            color: #90EE90;
+            margin-bottom: 5px;
+        }
+        
+        .example-desc {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .game-board {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 400px;
+        }
+        
+        .tents-grid-container {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .tents-grid {
+            display: grid;
+            gap: 2px;
+            background: rgba(34, 139, 34, 0.3);
+            padding: 8px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .tents-cell {
+            width: 50px;
+            height: 50px;
+            background: #8FBC8F;
+            border: 2px solid #556B2F;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            border-radius: 4px;
+        }
+        
+        .tents-cell:hover {
+            background: #98FB98;
+            transform: scale(1.05);
+            z-index: 10;
+        }
+        
+        .tents-cell.tree {
+            background: #228B22;
+            cursor: default;
+        }
+        
+        .tents-cell.tree:hover {
+            background: #228B22;
+            transform: none;
+        }
+        
+        .tents-cell.tent {
+            background: #D2691E;
+            border-color: #8B4513;
+        }
+        
+        .tents-cell.marked {
+            background: #DC143C;
+            border-color: #8B0000;
+        }
+        
+        .tents-cell.error {
+            background: #FF6B6B;
+            border-color: #FF0000;
+            animation: shake 0.5s ease-in-out;
+        }
+        
+        .tents-cell.completed {
+            background: #90EE90;
+            border-color: #228B22;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-3px); }
+            75% { transform: translateX(3px); }
+        }
+        
+        .row-numbers, .col-numbers {
+            position: absolute;
+            display: flex;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 8px;
+        }
+        
+        .row-numbers {
+            right: -45px;
+            top: 8px;
+            flex-direction: column;
+            gap: 2px;
+        }
+        
+        .col-numbers {
+            bottom: -45px;
+            left: 8px;
+            flex-direction: row;
+            gap: 2px;
+        }
+        
+        .number-cell {
+            width: 35px;
+            height: 35px;
+            background: rgba(34, 139, 34, 0.8);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 16px;
+            border-radius: 4px;
+            border: 2px solid #228B22;
+        }
+        
+        .number-cell.completed {
+            background: #32CD32;
+            border-color: #228B22;
+        }
+        
+        .number-cell.error {
+            background: #FF6B6B;
+            border-color: #FF0000;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            flex: 1;
+            min-width: 100px;
+            padding: 12px 8px;
+            border: none;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(45deg, #228B22, #32CD32);
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(45deg, #6B8E23, #9ACD32);
+            color: white;
+        }
+        
+        .btn-success {
+            background: linear-gradient(45deg, #4169E1, #87CEEB);
+            color: white;
+        }
+        
+        .btn-warning {
+            background: linear-gradient(45deg, #DAA520, #FFD700);
+            color: #333;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(45deg, #DC143C, #FF69B4);
+            color: white;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn:disabled {
+            background: #666;
+            color: #999;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            justify-content: center;
+        }
+        
+        .action-btn {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-width: 80px;
+        }
+        
+        .action-btn.tent-mode {
+            background: linear-gradient(45deg, #D2691E, #CD853F);
+            color: white;
+        }
+        
+        .action-btn.mark-mode {
+            background: linear-gradient(45deg, #DC143C, #FF69B4);
+            color: white;
+        }
+        
+        .action-btn.active {
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+            transform: scale(1.05);
+        }
+        
+        .success-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(34, 139, 34, 0.9);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            animation: fadeInOut 3s ease-in-out;
+        }
+        
+        .success-content {
+            text-align: center;
+            color: white;
+            max-width: 400px;
+            padding: 20px;
+        }
+        
+        .success-content h2 {
+            font-size: 36px;
+            margin-bottom: 15px;
+            animation: bounce 1s ease-in-out;
+        }
+        
+        .success-content p {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        
+        .success-stats {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 0; }
+            15%, 85% { opacity: 1; }
+        }
+        
+        .help-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1500;
+            padding: 20px;
+        }
+        
+        .help-modal.show {
+            display: flex;
+        }
+        
+        .help-content {
+            background: linear-gradient(145deg, #2d5016, #4a7c59);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            border: 2px solid rgba(144, 238, 144, 0.3);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        }
+        
+        .help-content h2 {
+            color: #90EE90;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 24px;
+        }
+        
+        .help-section {
+            margin-bottom: 25px;
+        }
+        
+        .help-section h3 {
+            color: #98FB98;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        
+        .help-section p, .help-section li {
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+        
+        .help-section ul {
+            padding-left: 20px;
+        }
+        
+        .formula-box {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            text-align: center;
+            border-left: 4px solid #90EE90;
+        }
+        
+        .close-help {
+            background: linear-gradient(45deg, #DC143C, #FF69B4);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 25px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+            margin-top: 20px;
+            transition: all 0.2s ease;
+        }
+        
+        .close-help:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .title {
+                font-size: 24px;
+            }
+            
+            .tents-cell {
+                width: 40px;
+                height: 40px;
+                font-size: 20px;
+            }
+            
+            .number-cell {
+                width: 30px;
+                height: 30px;
+                font-size: 14px;
+            }
+            
+            .row-numbers {
+                right: -35px;
+            }
+            
+            .col-numbers {
+                bottom: -35px;
+            }
+            
+            .controls {
+                flex-direction: column;
+            }
+            
+            .btn {
+                min-width: auto;
+            }
+            
+            .rule-examples {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .tents-cell {
+                width: 35px;
+                height: 35px;
+                font-size: 18px;
+            }
+            
+            .number-cell {
+                width: 25px;
+                height: 25px;
+                font-size: 12px;
+            }
+            
+            .row-numbers {
+                right: -30px;
+            }
+            
+            .col-numbers {
+                bottom: -30px;
+            }
+            
+            .info-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .difficulty-selector {
+                flex-direction: column;
+                gap: 5px;
+            }
+            
+            .difficulty-btn {
+                min-width: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">🏕️ TENTS</h1>
+            <p class="subtitle">Trees & Camping Logic Puzzle</p>
+        </div>
+        
+        <!-- Instrucciones colapsables -->
+        <div class="collapsible-section" id="instructionsSection">
+            <div class="section-header" onclick="toggleSection('instructions')">
+                <span>🎯 Cómo jugar</span>
+                <span class="section-icon">🔽</span>
+            </div>
+            <div class="section-content instructions" id="instructionsContent">
+                <h3>📝 Reglas del campamento:</h3>
+                <ul>
+                    <li><strong>Un árbol, una tienda:</strong> Cada 🌳 debe tener exactamente una ⛺ adyacente</li>
+                    <li><strong>Una tienda, un árbol:</strong> Cada ⛺ debe estar junto a exactamente un 🌳</li>
+                    <li><strong>No tocar tiendas:</strong> Las ⛺ no pueden tocarse (ni en diagonal)</li>
+                    <li><strong>Conteo correcto:</strong> Los números en los bordes indican cuántas ⛺ por fila/columna</li>
+                </ul>
+                
+                <h3>🏕️ Elementos del juego:</h3>
+                <div class="rule-examples">
+                    <div class="example-box">
+                        <div class="example-rule">🌳 Árbol</div>
+                        <div class="example-desc">Fijo en el mapa</div>
+                    </div>
+                    <div class="example-box">
+                        <div class="example-rule">⛺ Tienda</div>
+                        <div class="example-desc">Coloca aquí</div>
+                    </div>
+                    <div class="example-box">
+                        <div class="example-rule">❌ Marca</div>
+                        <div class="example-desc">Imposible colocar</div>
+                    </div>
+                    <div class="example-box">
+                        <div class="example-rule">2️⃣ Número</div>
+                        <div class="example-desc">Total de tiendas</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Stats colapsables -->
+        <div class="collapsible-section" id="statsSection">
+            <div class="section-header" onclick="toggleSection('stats')">
+                <span>📊 Estadísticas & Nivel</span>
+                <span class="section-icon">🔽</span>
+            </div>
+            <div class="section-content game-info" id="statsContent">
+                <div class="info-grid">
+                    <div class="info-item level-info">
+                        <div class="info-label">Tamaño</div>
+                        <div class="info-value" id="levelDisplay">6×6</div>
+                    </div>
+                    <div class="info-item time-info">
+                        <div class="info-label">Tiempo</div>
+                        <div class="info-value" id="timeDisplay">00:00</div>
+                    </div>
+                    <div class="info-item errors-info">
+                        <div class="info-label">Errores</div>
+                        <div class="info-value" id="errorsDisplay">0</div>
+                    </div>
+                    <div class="info-item progress-info">
+                        <div class="info-label">Progreso</div>
+                        <div class="info-value" id="progressDisplay">0%</div>
+                    </div>
+                </div>
+                
+                <div class="difficulty-selector" id="difficultySelector">
+                    <button class="difficulty-btn active" data-size="6">6×6</button>
+                    <button class="difficulty-btn" data-size="8">8×8</button>
+                    <button class="difficulty-btn" data-size="10">10×10</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="action-buttons">
+            <button class="action-btn tent-mode active" id="tentModeBtn" onclick="setMode('tent')">⛺ Tienda</button>
+            <button class="action-btn mark-mode" id="markModeBtn" onclick="setMode('mark')">❌ Marcar</button>
+        </div>
+        
+        <div class="game-board">
+            <div class="tents-grid-container">
+                <div class="tents-grid" id="tentsGrid">
+                    <!-- Se genera dinámicamente -->
+                </div>
+                <div class="row-numbers" id="rowNumbers">
+                    <!-- Se genera dinámicamente -->
+                </div>
+                <div class="col-numbers" id="colNumbers">
+                    <!-- Se genera dinámicamente -->
+                </div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button class="btn btn-primary" onclick="newPuzzle()">🎲 Nuevo Puzzle</button>
+            <button class="btn btn-secondary" onclick="clearBoard()">🗑️ Limpiar</button>
+            <button class="btn btn-success" onclick="showHelp()">❓ Ayuda</button>
+            <button class="btn btn-warning" onclick="getHint()">💡 Pista</button>
+            <button class="btn btn-danger" onclick="confirmBack()">🏠 Menú</button>
+        </div>
+    </div>
+    
+    <div class="success-animation" id="successAnimation">
+        <div class="success-content">
+            <h2>🎉 ¡CAMPAMENTO COMPLETO!</h2>
+            <p id="successMessage">¡Excelente trabajo de camping!</p>
+            <div class="success-stats" id="successStats">
+                <!-- Se llena dinámicamente -->
+            </div>
+        </div>
+    </div>
+    
+    <div class="help-modal" id="helpModal">
+        <div class="help-content">
+            <h2>🏕️ Guía Completa de TENTS</h2>
+            
+            <div class="help-section">
+                <h3>🎯 ¿Qué es TENTS?</h3>
+                <p>TENTS es un puzzle de lógica donde debes colocar tiendas de campaña junto a árboles siguiendo reglas específicas.</p>
+            </div>
+            
+            <div class="help-section">
+                <h3>📋 Reglas del Juego</h3>
+                <ul>
+                    <li><strong>Relación 1:1:</strong> Cada árbol debe tener exactamente una tienda adyacente (arriba, abajo, izquierda, derecha)</li>
+                    <li><strong>Tiendas únicas:</strong> Cada tienda debe estar junto a exactamente un árbol</li>
+                    <li><strong>Sin contacto:</strong> Las tiendas no pueden tocarse entre sí, ni siquiera en diagonal</li>
+                    <li><strong>Conteo exacto:</strong> Los números en los bordes te dicen exactamente cuántas tiendas debe haber en esa fila o columna</li>
+                </ul>
+            </div>
+            
+            <div class="help-section">
+                <h3>🎮 Controles</h3>
+                <div class="formula-box">
+                    <p><strong>Modo Tienda (⛺):</strong> Haz clic para colocar/quitar tiendas</p>
+                    <p><strong>Modo Marcar (❌):</strong> Marca espacios donde NO puede haber tiendas</p>
+                    <p><strong>Cambiar modo:</strong> Usa los botones de arriba o haz clic derecho</p>
+                </div>
+            </div>
+            
+            <div class="help-section">
+                <h3>💡 Estrategias</h3>
+                <ul>
+                    <li><strong>Empezar por restricciones:</strong> Si una fila/columna debe tener 0 tiendas, marca todos los espacios</li>
+                    <li><strong>Árboles aislados:</strong> Si un árbol solo tiene una posición posible para su tienda, colócala</li>
+                    <li><strong>Evitar contacto:</strong> Marca espacios alrededor de tiendas ya colocadas</li>
+                    <li><strong>Contar sistemáticamente:</strong> Verifica constantemente los números de fila/columna</li>
+                </ul>
+            </div>
+            
+            <button class="close-help" onclick="hideHelp()">✅ ¡Entendido!</button>
+        </div>
+    </div>
+    
+    <!-- Modal de confirmación -->
+    <div class="help-modal" id="confirmModal">
+        <div class="help-content" style="max-width: 400px;">
+            <h2 id="confirmTitle">🏠 Volver al Menú</h2>
+            <div class="help-section">
+                <p id="confirmMessage">¿Seguro que quieres volver al menú principal? Se perderá el progreso actual.</p>
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="close-help" onclick="confirmGoBack()" style="background: linear-gradient(45deg, #228B22, #32CD32);">✅ Sí, Volver</button>
+                <button class="close-help" onclick="hideConfirm()" style="background: linear-gradient(45deg, #DC143C, #FF69B4);">❌ Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class TentsGame {
+            constructor() {
+                this.size = 6;
+                this.grid = [];
+                this.trees = [];
+                this.tents = [];
+                this.marks = [];
+                this.rowTargets = [];
+                this.colTargets = [];
+                this.mode = 'tent'; // 'tent' or 'mark'
+                this.startTime = null;
+                this.gameCompleted = false;
+                this.errors = 0;
+                this.gameData = this.loadGameData();
+                
+                this.initializeGame();
+                this.setupEventListeners();
+                this.setupCollapsibleSections();
+                this.updateTimer();
+            }
+            
+            setupCollapsibleSections() {
+                // En mobile, colapsar por defecto las instrucciones
+                if (window.innerWidth <= 768) {
+                    this.toggleSection('instructions', false);
+                    this.toggleSection('stats', false);
+                } else {
+                    // En desktop, mostrar por defecto
+                    this.toggleSection('instructions', true);
+                    this.toggleSection('stats', true);
+                }
+            }
+            
+            toggleSection(sectionName, forceState = null) {
+                const section = document.getElementById(sectionName + 'Section');
+                const content = document.getElementById(sectionName + 'Content');
+                
+                if (!section || !content) return;
+                
+                if (forceState !== null) {
+                    if (forceState) {
+                        section.classList.remove('collapsed');
+                        content.classList.add('active');
+                    } else {
+                        section.classList.add('collapsed');
+                        content.classList.remove('active');
+                    }
+                } else {
+                    section.classList.toggle('collapsed');
+                    content.classList.toggle('active');
+                }
+            }
+            
+            loadGameData() {
+                try {
+                    const saved = localStorage.getItem('tents-progress');
+                    if (saved) {
+                        return JSON.parse(saved);
+                    }
+                } catch (e) {
+                    console.log('Error loading game data:', e);
+                }
+                return {
+                    bestTimes: {},
+                    gamesCompleted: 0,
+                    totalTime: 0
+                };
+            }
+            
+            saveGameData() {
+                try {
+                    const timeElapsed = this.startTime ? Date.now() - this.startTime : 0;
+                    const key = `${this.size}x${this.size}`;
+                    
+                    if (!this.gameData.bestTimes[key] || timeElapsed < this.gameData.bestTimes[key]) {
+                        this.gameData.bestTimes[key] = timeElapsed;
+                    }
+                    
+                    this.gameData.gamesCompleted++;
+                    this.gameData.totalTime += timeElapsed;
+                    
+                    localStorage.setItem('tents-progress', JSON.stringify(this.gameData));
+                } catch (e) {
+                    console.log('Error saving game data:', e);
+                }
+            }
+            
+            setupEventListeners() {
+                // Botones de dificultad
+                document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        if (this.gameCompleted) return;
+                        
+                        document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('active'));
+                        e.target.classList.add('active');
+                        
+                        this.size = parseInt(e.target.dataset.size);
+                        this.initializeGame();
+                    });
+                });
+                
+                // Click derecho para cambiar modo
+                document.addEventListener('contextmenu', (e) => {
+                    if (e.target.classList.contains('tents-cell')) {
+                        e.preventDefault();
+                        this.toggleMode();
+                    }
+                });
+                
+                // Cerrar modales al hacer clic fuera
+                const helpModal = document.getElementById('helpModal');
+                if (helpModal) {
+                    helpModal.addEventListener('click', (e) => {
+                        if (e.target === e.currentTarget) {
+                            hideHelp();
+                        }
+                    });
+                }
+                
+                const confirmModal = document.getElementById('confirmModal');
+                if (confirmModal) {
+                    confirmModal.addEventListener('click', (e) => {
+                        if (e.target === e.currentTarget) {
+                            hideConfirm();
+                        }
+                    });
+                }
+            }
+            
+            initializeGame() {
+                this.grid = Array(this.size).fill().map(() => Array(this.size).fill(0));
+                this.trees = [];
+                this.tents = [];
+                this.marks = [];
+                this.startTime = Date.now();
+                this.gameCompleted = false;
+                this.errors = 0;
+                
+                this.generatePuzzle();
+                this.renderGrid();
+                this.updateUI();
+            }
+            
+            generatePuzzle() {
+                // Limpiar grid
+                for (let row = 0; row < this.size; row++) {
+                    for (let col = 0; col < this.size; col++) {
+                        this.grid[row][col] = 0;
+                    }
+                }
+                
+                // Generar árboles y tiendas de forma válida
+                this.generateTreesAndTents();
+                
+                // Calcular targets de filas y columnas
+                this.calculateTargets();
+                
+                // Limpiar las tiendas para que el jugador las coloque
+                this.tents = [];
+                this.marks = [];
+            }
+            
+            generateTreesAndTents() {
+                const maxTrees = Math.floor((this.size * this.size) * 0.3); // 30% de árboles máximo
+                const minTrees = Math.floor((this.size * this.size) * 0.15); // 15% de árboles mínimo
+                const numTrees = minTrees + Math.floor(Math.random() * (maxTrees - minTrees));
+                
+                const placedPositions = new Set();
+                
+                for (let i = 0; i < numTrees; i++) {
+                    let attempts = 0;
+                    while (attempts < 100) {
+                        const row = Math.floor(Math.random() * this.size);
+                        const col = Math.floor(Math.random() * this.size);
+                        const pos = `${row},${col}`;
+                        
+                        if (!placedPositions.has(pos)) {
+                            // Colocar árbol
+                            this.trees.push({row, col});
+                            this.grid[row][col] = 1; // 1 = árbol
+                            placedPositions.add(pos);
+                            
+                            // Encontrar posición válida para la tienda
+                            const tentPos = this.findValidTentPosition(row, col, placedPositions);
+                            if (tentPos) {
+                                this.tents.push(tentPos);
+                                this.grid[tentPos.row][tentPos.col] = 2; // 2 = tienda
+                                placedPositions.add(`${tentPos.row},${tentPos.col}`);
+                                
+                                // Marcar espacios adyacentes a la tienda como ocupados
+                                this.markAdjacentSpaces(tentPos.row, tentPos.col, placedPositions);
+                            }
+                            break;
+                        }
+                        attempts++;
+                    }
+                }
+            }
+            
+            findValidTentPosition(treeRow, treeCol, placedPositions) {
+                const directions = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+                const validPositions = [];
+                
+                for (const [dr, dc] of directions) {
+                    const newRow = treeRow + dr;
+                    const newCol = treeCol + dc;
+                    const pos = `${newRow},${newCol}`;
+                    
+                    if (newRow >= 0 && newRow < this.size && 
+                        newCol >= 0 && newCol < this.size && 
+                        !placedPositions.has(pos)) {
+                        validPositions.push({row: newRow, col: newCol});
+                    }
+                }
+                
+                if (validPositions.length > 0) {
+                    return validPositions[Math.floor(Math.random() * validPositions.length)];
+                }
+                
+                return null;
+            }
+            
+            markAdjacentSpaces(row, col, placedPositions) {
+                // Marcar los 8 espacios adyacentes (incluyendo diagonales) como ocupados
+                for (let dr = -1; dr <= 1; dr++) {
+                    for (let dc = -1; dc <= 1; dc++) {
+                        if (dr === 0 && dc === 0) continue;
+                        
+                        const newRow = row + dr;
+                        const newCol = col + dc;
+                        
+                        if (newRow >= 0 && newRow < this.size && 
+                            newCol >= 0 && newCol < this.size) {
+                            const pos = `${newRow},${newCol}`;
+                            if (!placedPositions.has(pos)) {
+                                placedPositions.add(pos);
+                            }
+                        }
+                    }
+                }
+            }
+            
+            calculateTargets() {
+                this.rowTargets = [];
+                this.colTargets = [];
+                
+                // Calcular targets de filas
+                for (let row = 0; row < this.size; row++) {
+                    let count = 0;
+                    for (let col = 0; col < this.size; col++) {
+                        if (this.grid[row][col] === 2) count++;
+                    }
+                    this.rowTargets.push(count);
+                }
+                
+                // Calcular targets de columnas
+                for (let col = 0; col < this.size; col++) {
+                    let count = 0;
+                    for (let row = 0; row < this.size; row++) {
+                        if (this.grid[row][col] === 2) count++;
+                    }
+                    this.colTargets.push(count);
+                }
+                
+                // Limpiar tiendas del grid (el jugador las colocará)
+                for (let row = 0; row < this.size; row++) {
+                    for (let col = 0; col < this.size; col++) {
+                        if (this.grid[row][col] === 2) {
+                            this.grid[row][col] = 0;
+                        }
+                    }
+                }
+            }
+            
+            renderGrid() {
+                const grid = document.getElementById('tentsGrid');
+                const rowNumbers = document.getElementById('rowNumbers');
+                const colNumbers = document.getElementById('colNumbers');
+                
+                if (!grid || !rowNumbers || !colNumbers) return;
+                
+                // Limpiar grids
+                grid.innerHTML = '';
+                rowNumbers.innerHTML = '';
+                colNumbers.innerHTML = '';
+                
+                // Configurar grid
+                grid.style.gridTemplateColumns = `repeat(${this.size}, 1fr)`;
+                grid.style.gridTemplateRows = `repeat(${this.size}, 1fr)`;
+                
+                // Crear celdas
+                for (let row = 0; row < this.size; row++) {
+                    for (let col = 0; col < this.size; col++) {
+                        const cell = document.createElement('div');
+                        cell.className = 'tents-cell';
+                        cell.dataset.row = row;
+                        cell.dataset.col = col;
+                        
+                        // Contenido de la celda
+                        if (this.grid[row][col] === 1) {
+                            cell.textContent = '🌳';
+                            cell.classList.add('tree');
+                        } else if (this.isTent(row, col)) {
+                            cell.textContent = '⛺';
+                            cell.classList.add('tent');
+                        } else if (this.isMark(row, col)) {
+                            cell.textContent = '❌';
+                            cell.classList.add('marked');
+                        }
+                        
+                        cell.addEventListener('click', () => this.cellClick(row, col));
+                        grid.appendChild(cell);
+                    }
+                }
+                
+                // Crear números de filas
+                for (let row = 0; row < this.size; row++) {
+                    const numberCell = document.createElement('div');
+                    numberCell.className = 'number-cell';
+                    numberCell.textContent = this.rowTargets[row];
+                    
+                    // Verificar si está completa
+                    const currentCount = this.countTentsInRow(row);
+                    if (currentCount === this.rowTargets[row]) {
+                        numberCell.classList.add('completed');
+                    } else if (currentCount > this.rowTargets[row]) {
+                        numberCell.classList.add('error');
+                    }
+                    
+                    rowNumbers.appendChild(numberCell);
+                }
+                
+                // Crear números de columnas
+                for (let col = 0; col < this.size; col++) {
+                    const numberCell = document.createElement('div');
+                    numberCell.className = 'number-cell';
+                    numberCell.textContent = this.colTargets[col];
+                    
+                    // Verificar si está completa
+                    const currentCount = this.countTentsInCol(col);
+                    if (currentCount === this.colTargets[col]) {
+                        numberCell.classList.add('completed');
+                    } else if (currentCount > this.colTargets[col]) {
+                        numberCell.classList.add('error');
+                    }
+                    
+                    colNumbers.appendChild(numberCell);
+                }
+            }
+            
+            cellClick(row, col) {
+                if (this.gameCompleted || this.grid[row][col] === 1) return; // No clickear árboles
+                
+                if (this.mode === 'tent') {
+                    if (this.isTent(row, col)) {
+                        // Quitar tienda
+                        this.tents = this.tents.filter(t => t.row !== row || t.col !== col);
+                    } else if (!this.isMark(row, col)) {
+                        // Colocar tienda (si no hay marca)
+                        this.tents.push({row, col});
+                        // Quitar marca si existía
+                        this.marks = this.marks.filter(m => m.row !== row || m.col !== col);
+                    }
+                } else if (this.mode === 'mark') {
+                    if (this.isMark(row, col)) {
+                        // Quitar marca
+                        this.marks = this.marks.filter(m => m.row !== row || m.col !== col);
+                    } else if (!this.isTent(row, col)) {
+                        // Colocar marca (si no hay tienda)
+                        this.marks.push({row, col});
+                    }
+                }
+                
+                this.renderGrid();
+                this.validateBoard();
+                this.updateUI();
+                this.checkCompletion();
+            }
+            
+            isTent(row, col) {
+                return this.tents.some(t => t.row === row && t.col === col);
+            }
+            
+            isMark(row, col) {
+                return this.marks.some(m => m.row === row && m.col === col);
+            }
+            
+            countTentsInRow(row) {
+                return this.tents.filter(t => t.row === row).length;
+            }
+            
+            countTentsInCol(col) {
+                return this.tents.filter(t => t.col === col).length;
+            }
+            
+            validateBoard() {
+                let hasErrors = false;
+                
+                // Validar tiendas
+                this.tents.forEach(tent => {
+                    const cell = document.querySelector(`[data-row="${tent.row}"][data-col="${tent.col}"]`);
+                    if (!cell) return;
+                    
+                    let isValid = true;
+                    
+                    // Verificar que no toque otras tiendas
+                    for (let dr = -1; dr <= 1; dr++) {
+                        for (let dc = -1; dc <= 1; dc++) {
+                            if (dr === 0 && dc === 0) continue;
+                            
+                            const newRow = tent.row + dr;
+                            const newCol = tent.col + dc;
+                            
+                            if (this.isTent(newRow, newCol)) {
+                                isValid = false;
+                                break;
+                            }
+                        }
+                        if (!isValid) break;
+                    }
+                    
+                    // Verificar que esté junto a un árbol
+                    const directions = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+                    let hasAdjacentTree = false;
+                    for (const [dr, dc] of directions) {
+                        const newRow = tent.row + dr;
+                        const newCol = tent.col + dc;
+                        if (newRow >= 0 && newRow < this.size && 
+                            newCol >= 0 && newCol < this.size && 
+                            this.grid[newRow][newCol] === 1) {
+                            hasAdjacentTree = true;
+                            break;
+                        }
+                    }
+                    
+                    if (!isValid || !hasAdjacentTree) {
+                        cell.classList.add('error');
+                        hasErrors = true;
+                    } else {
+                        cell.classList.remove('error');
+                        cell.classList.add('completed');
+                    }
+                });
+                
+                if (hasErrors) {
+                    this.errors++;
+                }
+            }
+            
+            checkCompletion() {
+                // Verificar si todas las restricciones están satisfechas
+                let isComplete = true;
+                
+                // Verificar conteos de filas y columnas
+                for (let row = 0; row < this.size; row++) {
+                    if (this.countTentsInRow(row) !== this.rowTargets[row]) {
+                        isComplete = false;
+                        break;
+                    }
+                }
+                
+                if (isComplete) {
+                    for (let col = 0; col < this.size; col++) {
+                        if (this.countTentsInCol(col) !== this.colTargets[col]) {
+                            isComplete = false;
+                            break;
+                        }
+                    }
+                }
+                
+                // Verificar que cada árbol tenga exactamente una tienda adyacente
+                if (isComplete) {
+                    for (const tree of this.trees) {
+                        let adjacentTents = 0;
+                        const directions = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+                        
+                        for (const [dr, dc] of directions) {
+                            const newRow = tree.row + dr;
+                            const newCol = tree.col + dc;
+                            if (this.isTent(newRow, newCol)) {
+                                adjacentTents++;
+                            }
+                        }
+                        
+                        if (adjacentTents !== 1) {
+                            isComplete = false;
+                            break;
+                        }
+                    }
+                }
+                
+                // Verificar que ninguna tienda toque otra
+                if (isComplete) {
+                    for (const tent of this.tents) {
+                        for (let dr = -1; dr <= 1; dr++) {
+                            for (let dc = -1; dc <= 1; dc++) {
+                                if (dr === 0 && dc === 0) continue;
+                                
+                                const newRow = tent.row + dr;
+                                const newCol = tent.col + dc;
+                                
+                                if (this.isTent(newRow, newCol)) {
+                                    isComplete = false;
+                                    break;
+                                }
+                            }
+                            if (!isComplete) break;
+                        }
+                        if (!isComplete) break;
+                    }
+                }
+                
+                if (isComplete && this.tents.length === this.trees.length) {
+                    this.gameCompleted = true;
+                    this.saveGameData();
+                    this.showSuccessAnimation();
+                }
+            }
+            
+            showSuccessAnimation() {
+                const animation = document.getElementById('successAnimation');
+                const message = document.getElementById('successMessage');
+                const stats = document.getElementById('successStats');
+                
+                if (!animation || !message || !stats) return;
+                
+                const timeElapsed = this.startTime ? Date.now() - this.startTime : 0;
+                const minutes = Math.floor(timeElapsed / 60000);
+                const seconds = Math.floor((timeElapsed % 60000) / 1000);
+                
+                message.textContent = `¡Has completado el campamento ${this.size}×${this.size}!`;
+                
+                stats.innerHTML = `
+                    <p><strong>Tiempo:</strong> ${minutes}:${seconds.toString().padStart(2, '0')}</p>
+                    <p><strong>Errores:</strong> ${this.errors}</p>
+                    <p><strong>Tiendas colocadas:</strong> ${this.tents.length}</p>
+                    <p><strong>Árboles:</strong> ${this.trees.length}</p>
+                    ${this.errors === 0 ? '<p style="color: #90EE90;">🏆 ¡PERFECTO! Sin errores</p>' : ''}
+                `;
+                
+                animation.style.display = 'flex';
+                
+                setTimeout(() => {
+                    animation.style.display = 'none';
+                }, 3000);
+            }
+            
+            setMode(mode) {
+                this.mode = mode;
+                
+                // Actualizar botones
+                document.getElementById('tentModeBtn').classList.toggle('active', mode === 'tent');
+                document.getElementById('markModeBtn').classList.toggle('active', mode === 'mark');
+            }
+            
+            toggleMode() {
+                this.setMode(this.mode === 'tent' ? 'mark' : 'tent');
+            }
+            
+            getHint() {
+                // Buscar un movimiento obvio
+                // 1. Si una fila/columna ya tiene el número correcto de tiendas, marcar el resto
+                for (let row = 0; row < this.size; row++) {
+                    if (this.countTentsInRow(row) === this.rowTargets[row]) {
+                        for (let col = 0; col < this.size; col++) {
+                            if (this.grid[row][col] === 0 && !this.isTent(row, col) && !this.isMark(row, col)) {
+                                this.marks.push({row, col});
+                                this.renderGrid();
+                                return;
+                            }
+                        }
+                    }
+                }
+                
+                for (let col = 0; col < this.size; col++) {
+                    if (this.countTentsInCol(col) === this.colTargets[col]) {
+                        for (let row = 0; row < this.size; row++) {
+                            if (this.grid[row][col] === 0 && !this.isTent(row, col) && !this.isMark(row, col)) {
+                                this.marks.push({row, col});
+                                this.renderGrid();
+                                return;
+                            }
+                        }
+                    }
+                }
+                
+                // 2. Si un árbol solo tiene una posición posible para su tienda
+                for (const tree of this.trees) {
+                    const directions = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+                    const validPositions = [];
+                    
+                    for (const [dr, dc] of directions) {
+                        const newRow = tree.row + dr;
+                        const newCol = tree.col + dc;
+                        
+                        if (newRow >= 0 && newRow < this.size && 
+                            newCol >= 0 && newCol < this.size && 
+                            this.grid[newRow][newCol] === 0 && 
+                            !this.isTent(newRow, newCol) && 
+                            !this.isMark(newRow, newCol)) {
+                            validPositions.push({row: newRow, col: newCol});
+                        }
+                    }
+                    
+                    if (validPositions.length === 1) {
+                        this.tents.push(validPositions[0]);
+                        this.renderGrid();
+                        this.validateBoard();
+                        this.updateUI();
+                        return;
+                    }
+                }
+                
+                alert('🤔 No encuentro una pista obvia. ¡Sigue intentando!');
+            }
+            
+            clearBoard() {
+                this.tents = [];
+                this.marks = [];
+                this.renderGrid();
+                this.updateUI();
+            }
+            
+            newPuzzle() {
+                this.initializeGame();
+            }
+            
+            updateUI() {
+                const levelDisplay = document.getElementById('levelDisplay');
+                const errorsDisplay = document.getElementById('errorsDisplay');
+                const progressDisplay = document.getElementById('progressDisplay');
+                
+                if (levelDisplay) levelDisplay.textContent = `${this.size}×${this.size}`;
+                if (errorsDisplay) errorsDisplay.textContent = this.errors;
+                
+                // Calcular progreso
+                const totalTents = this.trees.length;
+                const placedTents = this.tents.length;
+                const progress = totalTents > 0 ? Math.round((placedTents / totalTents) * 100) : 0;
+                if (progressDisplay) progressDisplay.textContent = `${progress}%`;
+            }
+            
+            updateTimer() {
+                if (this.startTime && !this.gameCompleted) {
+                    const elapsed = Date.now() - this.startTime;
+                    const minutes = Math.floor(elapsed / 60000);
+                    const seconds = Math.floor((elapsed % 60000) / 1000);
+                    const timeDisplay = document.getElementById('timeDisplay');
+                    if (timeDisplay) {
+                        timeDisplay.textContent = 
+                            `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                    }
+                }
+                
+                requestAnimationFrame(() => this.updateTimer());
+            }
+        }
+        
+        // Funciones globales
+        let game;
+        
+        function initGame() {
+            try {
+                game = new TentsGame();
+            } catch (e) {
+                console.error('Error initializing game:', e);
+                const gameBoard = document.getElementById('tentsGrid');
+                if (gameBoard) {
+                    gameBoard.innerHTML = '<div style="color: white; text-align: center; padding: 20px;">Error al cargar el juego. Intenta recargar la página.</div>';
+                }
+            }
+        }
+        
+        function newPuzzle() {
+            if (game) game.newPuzzle();
+        }
+        
+        function clearBoard() {
+            if (game) game.clearBoard();
+        }
+        
+        function getHint() {
+            if (game) game.getHint();
+        }
+        
+        function setMode(mode) {
+            if (game) game.setMode(mode);
+        }
+        
+        function showHelp() {
+            const helpModal = document.getElementById('helpModal');
+            if (helpModal) helpModal.classList.add('show');
+        }
+        
+        function hideHelp() {
+            const helpModal = document.getElementById('helpModal');
+            if (helpModal) helpModal.classList.remove('show');
+        }
+        
+        function showConfirm() {
+            const confirmModal = document.getElementById('confirmModal');
+            if (confirmModal) confirmModal.classList.add('show');
+        }
+        
+        function hideConfirm() {
+            const confirmModal = document.getElementById('confirmModal');
+            if (confirmModal) confirmModal.classList.remove('show');
+        }
+        
+        function confirmGoBack() {
+            window.location.href = '../index.html';
+        }
+        
+        function confirmBack() {
+            if (game && game.startTime && !game.gameCompleted) {
+                showConfirm();
+            } else {
+                window.location.href = '../index.html';
+            }
+        }
+        
+        function toggleSection(sectionName) {
+            if (game) game.toggleSection(sectionName);
+        }
+        
+        // Inicializar cuando la página carga
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(initGame, 100);
+        });
+    </script>
+</body>
+</html>
